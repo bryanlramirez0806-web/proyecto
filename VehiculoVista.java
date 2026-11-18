@@ -13,8 +13,8 @@ import javax.swing.JTextField;
 
 public class VehiculoVista extends JPanel {
     protected JButton btnConsultar, btnAgregar, btnActualizar, btnEliminar;
-    protected JTextField txtIdVehiculo, txtIdCliente, txtMarca, txtSubmarca, txtModelo, txtTipoVehiculo, txtNumeroSerie, txtPlacas;
-    protected JLabel lblTitulo, lblIdVehiculo, lblIdCliente, lblMarca, lblSubmarca, lblModelo, lblTipoVehiculo, lblNumeroSerie, lblPlacas;
+    protected JTextField txtIdVehiculo, txtIdCliente, txtIdSubmarca, txtModelo, txtTipoVehiculo, txtNumeroSerie, txtPlacas;
+    protected JLabel lblTitulo, lblIdVehiculo, lblIdCliente, lblIdSubmarca, lblModelo, lblTipoVehiculo, lblNumeroSerie, lblPlacas;
     protected JTable tabla;
     protected VehiculoTM vehiculoModelo;
     protected JComboBox<Vehiculo> cmbVehiculos;
@@ -35,11 +35,9 @@ public class VehiculoVista extends JPanel {
         lblIdCliente = crearLabel("ID Cliente:", 30, 90);
         txtIdCliente = crearTextField("0", 130, 90);
 
-        lblMarca = crearLabel("Marca:", 30, 130);
-        txtMarca = crearTextField("Marca", 130, 130);
-
-        lblSubmarca = crearLabel("Submarca:", 30, 170);
-        txtSubmarca = crearTextField("Submarca", 130, 170);
+        // Reemplazado Marca y Submarca de texto por ID Submarca numérico
+        lblIdSubmarca = crearLabel("ID Submarca:", 30, 130);
+        txtIdSubmarca = crearTextField("0", 130, 130);
 
         lblModelo = crearLabel("Modelo:", 450, 50);
         txtModelo = crearTextField("Modelo", 550, 50);

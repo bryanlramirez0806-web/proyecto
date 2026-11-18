@@ -6,7 +6,8 @@ import javax.swing.table.AbstractTableModel;
 
 public class VehiculoTM extends AbstractTableModel {
     protected List<Vehiculo> vehiculoLista;
-    protected String[] encabezados = {"ID Vehículo", "ID Cliente", "Marca", "Submarca", "Modelo", "Tipo", "N° Serie", "Placas", "Activo"};
+    // Se actualiza el encabezado para mostrar "ID Submarca" en lugar de Marca y Submarca separadas
+    protected String[] encabezados = {"ID Vehículo", "ID Cliente", "ID Submarca", "Modelo", "Tipo", "N° Serie", "Placas", "Activo"};
 
     public VehiculoTM() {
         vehiculoLista = new ArrayList<>();
@@ -48,13 +49,12 @@ public class VehiculoTM extends AbstractTableModel {
             switch (columnIndex) {
                 case 0: return v.getIdVehiculo();
                 case 1: return v.getIdCliente();
-                case 2: return v.getMarca();
-                case 3: return v.getSubmarca();
-                case 4: return v.getModelo();
-                case 5: return v.getTipoVehiculo();
-                case 6: return v.getNumeroSerie();
-                case 7: return v.getPlacas();
-                case 8: return v.isActivo();
+                case 2: return v.getIdSubmarca(); // Reemplazado Marca por ID Submarca
+                case 3: return v.getModelo();
+                case 4: return v.getTipoVehiculo();
+                case 5: return v.getNumeroSerie();
+                case 6: return v.getPlacas();
+                case 7: return v.isActivo();
                 default: return null;
             }
         }

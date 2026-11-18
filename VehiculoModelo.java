@@ -23,8 +23,7 @@ public class VehiculoModelo extends Conexion implements DAO {
                 lista.add(new Vehiculo(
                     rs.getInt("idVehiculo"),
                     rs.getInt("idCliente"),
-                    rs.getString("marca"),
-                    rs.getString("submarca"),
+                    rs.getInt("idSubmarca"),
                     rs.getString("modelo"),
                     rs.getString("tipoVehiculo"),
                     rs.getString("numeroSerie"),
@@ -33,7 +32,7 @@ public class VehiculoModelo extends Conexion implements DAO {
                 ));
             }
         } catch (SQLException ex) {
-            System.out.println("Error: " + ex.getMessage());
+            System.out.println("Error al leer vehículos: " + ex.getMessage());
         } finally {
             this.close();
         }
@@ -45,18 +44,17 @@ public class VehiculoModelo extends Conexion implements DAO {
         try {
             this.conectar();
             Vehiculo v = (Vehiculo) obj;
-            ps = cnx.prepareStatement("INSERT INTO vehiculo (idCliente, marca, submarca, modelo, tipoVehiculo, numeroSerie, placas, activo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            ps = cnx.prepareStatement("INSERT INTO vehiculo (idCliente, idSubmarca, modelo, tipoVehiculo, numeroSerie, placas, activo) VALUES (?, ?, ?, ?, ?, ?, ?)");
             ps.setInt(1, v.getIdCliente());
-            ps.setString(2, v.getMarca());
-            ps.setString(3, v.getSubmarca());
-            ps.setString(4, v.getModelo());
-            ps.setString(5, v.getTipoVehiculo());
-            ps.setString(6, v.getNumeroSerie());
-            ps.setString(7, v.getPlacas());
-            ps.setBoolean(8, true);
+            ps.setInt(2, v.getIdSubmarca());
+            ps.setString(3, v.getModelo());
+            ps.setString(4, v.getTipoVehiculo());
+            ps.setString(5, v.getNumeroSerie());
+            ps.setString(6, v.getPlacas());
+            ps.setBoolean(7, true);
             return ps.executeUpdate();
         } catch (SQLException ex) {
-            System.out.println("Error: " + ex.getMessage());
+            System.out.println("Error al crear vehículo: " + ex.getMessage());
         } finally {
             this.close();
         }
@@ -68,18 +66,17 @@ public class VehiculoModelo extends Conexion implements DAO {
         try {
             this.conectar();
             Vehiculo v = (Vehiculo) obj;
-            ps = cnx.prepareStatement("UPDATE vehiculo SET idCliente = ?, marca = ?, submarca = ?, modelo = ?, tipoVehiculo = ?, numeroSerie = ?, placas = ? WHERE idVehiculo = ?");
+            ps = cnx.prepareStatement("UPDATE vehiculo SET idCliente = ?, idSubmarca = ?, modelo = ?, tipoVehiculo = ?, numeroSerie = ?, placas = ? WHERE idVehiculo = ?");
             ps.setInt(1, v.getIdCliente());
-            ps.setString(2, v.getMarca());
-            ps.setString(3, v.getSubmarca());
-            ps.setString(4, v.getModelo());
-            ps.setString(5, v.getTipoVehiculo());
-            ps.setString(6, v.getNumeroSerie());
-            ps.setString(7, v.getPlacas());
-            ps.setInt(8, v.getIdVehiculo());
+            ps.setInt(2, v.getIdSubmarca());
+            ps.setString(3, v.getModelo());
+            ps.setString(4, v.getTipoVehiculo());
+            ps.setString(5, v.getNumeroSerie());
+            ps.setString(6, v.getPlacas());
+            ps.setInt(7, v.getIdVehiculo());
             return ps.executeUpdate();
         } catch (SQLException ex) {
-            System.out.println("Error: " + ex.getMessage());
+            System.out.println("Error al actualizar vehículo: " + ex.getMessage());
         } finally {
             this.close();
         }
@@ -95,7 +92,7 @@ public class VehiculoModelo extends Conexion implements DAO {
             ps.setInt(1, v.getIdVehiculo());
             return ps.executeUpdate();
         } catch (SQLException ex) {
-            System.out.println("Error: " + ex.getMessage());
+            System.out.println("Error al eliminar vehículo: " + ex.getMessage());
         } finally {
             this.close();
         }

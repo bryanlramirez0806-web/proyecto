@@ -2,20 +2,18 @@ package polizas.Vehiculos;
 
 public class Vehiculo {
     protected int idVehiculo;
-    protected int idCliente; // FK hacia Cliente
-    protected String marca;
-    protected String submarca;
+    protected int idCliente;
+    protected int idSubmarca; // Corregido a int idSubmarca
     protected String modelo;
     protected String tipoVehiculo;
     protected String numeroSerie;
     protected String placas;
     protected boolean activo;
 
-    public Vehiculo(int idVehiculo, int idCliente, String marca, String submarca, String modelo, String tipoVehiculo, String numeroSerie, String placas, boolean activo) {
+    public Vehiculo(int idVehiculo, int idCliente, int idSubmarca, String modelo, String tipoVehiculo, String numeroSerie, String placas, boolean activo) {
         this.idVehiculo = idVehiculo;
         this.idCliente = idCliente;
-        this.marca = marca;
-        this.submarca = submarca;
+        this.idSubmarca = idSubmarca;
         this.modelo = modelo;
         this.tipoVehiculo = tipoVehiculo;
         this.numeroSerie = numeroSerie;
@@ -29,11 +27,8 @@ public class Vehiculo {
     public int getIdCliente() { return idCliente; }
     public void setIdCliente(int idCliente) { this.idCliente = idCliente; }
 
-    public String getMarca() { return marca; }
-    public void setMarca(String marca) { this.marca = marca; }
-
-    public String getSubmarca() { return submarca; }
-    public void setSubmarca(String submarca) { this.submarca = submarca; }
+    public int getIdSubmarca() { return idSubmarca; }
+    public void setIdSubmarca(int idSubmarca) { this.idSubmarca = idSubmarca; }
 
     public String getModelo() { return modelo; }
     public void setModelo(String modelo) { this.modelo = modelo; }
@@ -52,6 +47,6 @@ public class Vehiculo {
 
     @Override
     public String toString() {
-        return this.marca + " " + this.submarca + " (" + this.placas + ")";
+        return "Submarca ID: " + this.idSubmarca + " (" + this.placas + ")";
     }
 }

@@ -26,18 +26,12 @@ public class VehiculoControl {
         vv.btnAgregar.addActionListener(e -> {
             try {
                 int idCliente = Integer.parseInt(vv.txtIdCliente.getText());
-                String marca = vv.txtMarca.getText();
-
-                if (marca.trim().isEmpty() || marca.equals("Marca")) {
-                    JOptionPane.showMessageDialog(vv, "Ingresa una marca válida.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
+                int idSubmarca = Integer.parseInt(vv.txtIdSubmarca.getText()); // Recoge el ID de submarca numérico
 
                 Vehiculo v = new Vehiculo(
                     0,
                     idCliente,
-                    marca,
-                    vv.txtSubmarca.getText(),
+                    idSubmarca,
                     vv.txtModelo.getText(),
                     vv.txtTipoVehiculo.getText(),
                     vv.txtNumeroSerie.getText(),
@@ -50,10 +44,10 @@ public class VehiculoControl {
                     JOptionPane.showMessageDialog(vv, "¡Vehículo agregado correctamente!");
                     vv.actualizarVista(vm.read());
                 } else {
-                    JOptionPane.showMessageDialog(vv, "No se pudo agregar el vehículo. Verifica que el ID del Cliente exista.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(vv, "No se pudo agregar el vehículo. Verifica que los IDs de Cliente y Submarca existan.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(vv, "El ID de Cliente debe ser un número válido", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(vv, "El ID de Cliente y el ID de Submarca deben ser números válidos", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -62,12 +56,12 @@ public class VehiculoControl {
             try {
                 int idVehiculo = Integer.parseInt(vv.txtIdVehiculo.getText());
                 int idCliente = Integer.parseInt(vv.txtIdCliente.getText());
+                int idSubmarca = Integer.parseInt(vv.txtIdSubmarca.getText());
 
                 Vehiculo v = new Vehiculo(
                     idVehiculo,
                     idCliente,
-                    vv.txtMarca.getText(),
-                    vv.txtSubmarca.getText(),
+                    idSubmarca,
                     vv.txtModelo.getText(),
                     vv.txtTipoVehiculo.getText(),
                     vv.txtNumeroSerie.getText(),
@@ -87,7 +81,7 @@ public class VehiculoControl {
         vv.btnEliminar.addActionListener(e -> {
             try {
                 int idVehiculo = Integer.parseInt(vv.txtIdVehiculo.getText());
-                Vehiculo v = new Vehiculo(idVehiculo, 0, "", "", "", "", "", "", true);
+                Vehiculo v = new Vehiculo(idVehiculo, 0, 0, "", "", "", "", true);
 
                 int resultado = vm.delete(v);
                 JOptionPane.showMessageDialog(vv, resultado > 0 ? "Vehículo eliminado correctamente" : "No se pudo eliminar");
@@ -105,12 +99,11 @@ public class VehiculoControl {
                 if (fila != -1) {
                     vv.txtIdVehiculo.setText(String.valueOf(vv.vehiculoModelo.getValueAt(fila, 0)));
                     vv.txtIdCliente.setText(String.valueOf(vv.vehiculoModelo.getValueAt(fila, 1)));
-                    vv.txtMarca.setText((String) vv.vehiculoModelo.getValueAt(fila, 2));
-                    vv.txtSubmarca.setText((String) vv.vehiculoModelo.getValueAt(fila, 3));
-                    vv.txtModelo.setText((String) vv.vehiculoModelo.getValueAt(fila, 4));
-                    vv.txtTipoVehiculo.setText((String) vv.vehiculoModelo.getValueAt(fila, 5));
-                    vv.txtNumeroSerie.setText((String) vv.vehiculoModelo.getValueAt(fila, 6));
-                    vv.txtPlacas.setText((String) vv.vehiculoModelo.getValueAt(fila, 7));
+                    vv.txtIdSubmarca.setText(String.valueOf(vv.vehiculoModelo.getValueAt(fila, 2)));
+                    vv.txtModelo.setText((String) vv.vehiculoModelo.getValueAt(fila, 3));
+                    vv.txtTipoVehiculo.setText((String) vv.vehiculoModelo.getValueAt(fila, 4));
+                    vv.txtNumeroSerie.setText((String) vv.vehiculoModelo.getValueAt(fila, 5));
+                    vv.txtPlacas.setText((String) vv.vehiculoModelo.getValueAt(fila, 6));
                 }
             }
         });

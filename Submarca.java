@@ -3,14 +3,12 @@ package polizas.Submarcas;
 public class Submarca {
     protected int idSubmarca;
     protected int idMarca;
-    protected String nombreSubmarca;
-    protected boolean activo;
+    protected String nombre; // Actualizado de nombreSubmarca a nombre
 
-    public Submarca(int idSubmarca, int idMarca, String nombreSubmarca, boolean activo) {
+    public Submarca(int idSubmarca, int idMarca, String nombre) {
         this.idSubmarca = idSubmarca;
         this.idMarca = idMarca;
-        this.nombreSubmarca = nombreSubmarca;
-        this.activo = activo;
+        this.nombre = nombre;
     }
 
     public int getIdSubmarca() { return idSubmarca; }
@@ -19,14 +17,11 @@ public class Submarca {
     public int getIdMarca() { return idMarca; }
     public void setIdMarca(int idMarca) { this.idMarca = idMarca; }
 
-    public String getNombreSubmarca() { return nombreSubmarca; }
-    public void setNombreSubmarca(String nombreSubmarca) { this.nombreSubmarca = nombreSubmarca; }
-
-    public boolean isActivo() { return activo; }
-    public void setActivo(boolean activo) { this.activo = activo; }
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
 
     @Override
     public String toString() {
-        return this.nombreSubmarca;
+        return this.nombre;
     }
 }
