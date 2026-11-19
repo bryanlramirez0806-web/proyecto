@@ -17,7 +17,7 @@ public class CancelacionModelo extends Conexion implements DAO {
         try { conectar(); Cancelacion x = (Cancelacion) obj;
             ps = cnx.prepareStatement("INSERT INTO cancelacion (idPoliza, idUsuario, fechaSolicitud, motivo, montoDevolucion, estatusDevolucion) VALUES (?, ?, ?, ?, ?, ?)");
             ps.setInt(1, x.getIdPoliza()); ps.setInt(2, x.getIdUsuario()); ps.setString(3, x.getFechaSolicitud());
-            ps.setString(4, x.getMotivo()); ps.setDouble(5, x.getMontoDevolucion()); ps.setString(6, x.getEstatusDevolucion());
+            ps.setString(4, x.getMotivo()); ps.setDouble(5, x.getMontoDevolucion()); ps.setString(6, enumVal(x.getEstatusDevolucion()));
             return ps.executeUpdate();
         } catch(SQLException e) { return 0; } finally { close(); }
     }
@@ -25,7 +25,7 @@ public class CancelacionModelo extends Conexion implements DAO {
         try { conectar(); Cancelacion x = (Cancelacion) obj;
             ps = cnx.prepareStatement("UPDATE cancelacion SET idPoliza = ?, idUsuario = ?, fechaSolicitud = ?, motivo = ?, montoDevolucion = ?, estatusDevolucion = ? WHERE idCancelacion = ?");
             ps.setInt(1, x.getIdPoliza()); ps.setInt(2, x.getIdUsuario()); ps.setString(3, x.getFechaSolicitud());
-            ps.setString(4, x.getMotivo()); ps.setDouble(5, x.getMontoDevolucion()); ps.setString(6, x.getEstatusDevolucion()); ps.setInt(7, x.getIdCancelacion());
+            ps.setString(4, x.getMotivo()); ps.setDouble(5, x.getMontoDevolucion()); ps.setString(6, enumVal(x.getEstatusDevolucion())); ps.setInt(7, x.getIdCancelacion());
             return ps.executeUpdate();
         } catch(SQLException e) { return 0; } finally { close(); }
     }

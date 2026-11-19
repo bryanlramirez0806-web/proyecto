@@ -16,7 +16,7 @@ public class DocumentoVista extends JPanel {
 
         add(crearL("ID Doc:", 30, 50)); txtId = crearT("0", 130, 50);
         add(crearL("ID Cliente:", 30, 90)); txtIdCliente = crearT("0", 130, 90);
-        add(crearL("Tipo:", 30, 130)); txtTipo = crearT("INE / INE", 130, 130);
+        add(crearL("Tipo:", 30, 130)); txtTipo = crearT("INE", 130, 130);
         add(crearL("F. Recepción:", 30, 170)); txtFecha = crearT("2026-11-17", 130, 170);
         add(crearL("Ruta Archivo:", 30, 210)); txtRuta = crearT("C:/docs/file.pdf", 130, 210);
 

@@ -48,7 +48,7 @@ public class ClienteVista extends JPanel {
         txtDireccion = crearTextField("Dirección", 550, 90);
 
         lblMedioContacto = crearLabel("Medio Contacto:", 450, 130);
-        txtMedioContacto = crearTextField("Medio", 550, 130);
+        txtMedioContacto = crearTextField("WHATSAPP", 550, 130);
 
         cmbClientes = new JComboBox<>();
         cmbClientes.setBounds(450, 170, 350, 30);

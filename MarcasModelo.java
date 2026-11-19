@@ -22,7 +22,7 @@ public class MarcasModelo extends Conexion implements DAO {
             rs = ps.executeQuery();
             lista.clear();
             while (rs.next()) {
-                lista.add(new Marcas(rs.getInt("idMarca"), rs.getString("nombreMarca")));
+                lista.add(new Marcas(rs.getInt("idMarca"), rs.getString("nombre")));
             }
         } catch (SQLException ex) {
             System.out.println("Error: " + ex.getMessage());
@@ -44,7 +44,7 @@ public class MarcasModelo extends Conexion implements DAO {
         try {
             this.conectar();
             Marcas marcas = (Marcas) obj; 
-            ps = cnx.prepareStatement("INSERT INTO marca (nombreMarca) VALUES (?)");
+            ps = cnx.prepareStatement("INSERT INTO marca (nombre) VALUES (?)");
             ps.setString(1, marcas.getNombre());
             return ps.executeUpdate();
         } catch (SQLException ex) {
@@ -67,7 +67,7 @@ public class MarcasModelo extends Conexion implements DAO {
         try {
             this.conectar();
             Marcas marcas = (Marcas) obj;
-            ps = cnx.prepareStatement("UPDATE marca SET nombreMarca = ? WHERE idMarca = ?");
+            ps = cnx.prepareStatement("UPDATE marca SET nombre = ? WHERE idMarca = ?");
             ps.setString(1, marcas.getNombre());
             ps.setInt(2, marcas.getId()); 
             return ps.executeUpdate();

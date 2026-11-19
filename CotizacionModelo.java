@@ -28,7 +28,7 @@ public class CotizacionModelo extends Conexion implements DAO {
                     rs.getInt("idTipo"),
                     rs.getString("fecha"),
                     rs.getDouble("costo"),
-                    rs.getString("opcionesPago"),
+                    rs.getString("opcionPago"),
                     rs.getString("estatus")
                 ));
             }
@@ -45,15 +45,15 @@ public class CotizacionModelo extends Conexion implements DAO {
         try {
             this.conectar();
             Cotizacion c = (Cotizacion) obj;
-            ps = cnx.prepareStatement("INSERT INTO cotizacion (idVehiculo, idUsuario, idCompania, idTipo, fecha, costo, opcionesPago, estatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            ps = cnx.prepareStatement("INSERT INTO cotizacion (idVehiculo, idUsuario, idCompania, idTipo, fecha, costo, opcionPago, estatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             ps.setInt(1, c.getIdVehiculo());
             ps.setInt(2, c.getIdUsuario());
             ps.setInt(3, c.getIdCompania());
             ps.setInt(4, c.getIdTipo());
             ps.setString(5, c.getFecha());
             ps.setDouble(6, c.getCosto());
-            ps.setString(7, c.getOpcionesPago());
-            ps.setString(8, c.getEstatus());
+            ps.setString(7, enumVal(c.getOpcionesPago()));
+            ps.setString(8, enumVal(c.getEstatus()));
             return ps.executeUpdate();
         } catch (SQLException ex) {
             System.out.println("Error: " + ex.getMessage());
@@ -68,15 +68,15 @@ public class CotizacionModelo extends Conexion implements DAO {
         try {
             this.conectar();
             Cotizacion c = (Cotizacion) obj;
-            ps = cnx.prepareStatement("UPDATE cotizacion SET idVehiculo = ?, idUsuario = ?, idCompania = ?, idTipo = ?, fecha = ?, costo = ?, opcionesPago = ?, estatus = ? WHERE idCotizacion = ?");
+            ps = cnx.prepareStatement("UPDATE cotizacion SET idVehiculo = ?, idUsuario = ?, idCompania = ?, idTipo = ?, fecha = ?, costo = ?, opcionPago = ?, estatus = ? WHERE idCotizacion = ?");
             ps.setInt(1, c.getIdVehiculo());
             ps.setInt(2, c.getIdUsuario());
             ps.setInt(3, c.getIdCompania());
             ps.setInt(4, c.getIdTipo());
             ps.setString(5, c.getFecha());
             ps.setDouble(6, c.getCosto());
-            ps.setString(7, c.getOpcionesPago());
-            ps.setString(8, c.getEstatus());
+            ps.setString(7, enumVal(c.getOpcionesPago()));
+            ps.setString(8, enumVal(c.getEstatus()));
             ps.setInt(9, c.getIdCotizacion());
             return ps.executeUpdate();
         } catch (SQLException ex) {

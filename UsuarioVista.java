@@ -42,7 +42,7 @@ public class UsuarioVista extends JPanel {
         txtCorreo = crearTextField("Correo", 530, 50);
 
         lblRol = crearLabel("Rol:", 450, 90);
-        txtRol = crearTextField("Rol", 530, 90);
+        txtRol = crearTextField("VENDEDOR", 530, 90);
 
         cmbUsuarios = new JComboBox<>();
         cmbUsuarios.setBounds(450, 130, 350, 30);

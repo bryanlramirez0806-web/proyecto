@@ -50,7 +50,7 @@ public class ClienteModelo extends Conexion implements DAO {
             ps.setString(3, c.getCorreo());
             ps.setString(4, c.getRfc());
             ps.setString(5, c.getDireccion());
-            ps.setString(6, c.getMedioContacto());
+            ps.setString(6, enumVal(c.getMedioContacto()));
             ps.setBoolean(7, true);
             return ps.executeUpdate();
         } catch (SQLException ex) {
@@ -72,7 +72,7 @@ public class ClienteModelo extends Conexion implements DAO {
             ps.setString(3, c.getCorreo());
             ps.setString(4, c.getRfc());
             ps.setString(5, c.getDireccion());
-            ps.setString(6, c.getMedioContacto());
+            ps.setString(6, enumVal(c.getMedioContacto()));
             ps.setInt(7, c.getIdCliente());
             return ps.executeUpdate();
         } catch (SQLException ex) {

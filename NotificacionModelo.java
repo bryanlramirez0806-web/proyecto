@@ -16,16 +16,16 @@ public class NotificacionModelo extends Conexion implements DAO {
     @Override public int create(Object obj) {
         try { conectar(); Notificacion n = (Notificacion) obj;
             ps = cnx.prepareStatement("INSERT INTO notificacion (idPoliza, idUsuario, tipo, fecha, medio, costoRenovacion, realizada) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            ps.setInt(1, n.getIdPoliza()); ps.setInt(2, n.getIdUsuario()); ps.setString(3, n.getTipo());
-            ps.setString(4, n.getFecha()); ps.setString(5, n.getMedio()); ps.setDouble(6, n.getCostoRenovacion()); ps.setBoolean(7, true);
+            ps.setInt(1, n.getIdPoliza()); ps.setInt(2, n.getIdUsuario()); ps.setString(3, enumVal(n.getTipo()));
+            ps.setString(4, n.getFecha()); ps.setString(5, enumVal(n.getMedio())); ps.setDouble(6, n.getCostoRenovacion()); ps.setBoolean(7, true);
             return ps.executeUpdate();
         } catch(SQLException e) { return 0; } finally { close(); }
     }
     @Override public int update(Object obj) {
         try { conectar(); Notificacion n = (Notificacion) obj;
             ps = cnx.prepareStatement("UPDATE notificacion SET idPoliza = ?, idUsuario = ?, tipo = ?, fecha = ?, medio = ?, costoRenovacion = ? WHERE idNotificacion = ?");
-            ps.setInt(1, n.getIdPoliza()); ps.setInt(2, n.getIdUsuario()); ps.setString(3, n.getTipo());
-            ps.setString(4, n.getFecha()); ps.setString(5, n.getMedio()); ps.setDouble(6, n.getCostoRenovacion()); ps.setInt(7, n.getIdNotificacion());
+            ps.setInt(1, n.getIdPoliza()); ps.setInt(2, n.getIdUsuario()); ps.setString(3, enumVal(n.getTipo()));
+            ps.setString(4, n.getFecha()); ps.setString(5, enumVal(n.getMedio())); ps.setDouble(6, n.getCostoRenovacion()); ps.setInt(7, n.getIdNotificacion());
             return ps.executeUpdate();
         } catch(SQLException e) { return 0; } finally { close(); }
     }

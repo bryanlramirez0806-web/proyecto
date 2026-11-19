@@ -50,8 +50,12 @@ public class PolizaModelo extends Conexion implements DAO {
             this.conectar();
             PolizaEntidad p = (PolizaEntidad) obj;
             ps = cnx.prepareStatement("INSERT INTO poliza (numeroPoliza, idCotizacion, idVehiculo, idCompania, idUsuario, idTipo, idPolizaAnterior, fechaEmision, fechaInicio, fechaVencimiento, primaTotal, estatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            ps.setString(1, p.getNumeroPoliza());
-            ps.setInt(2, p.getIdCotizacion());
+            ps.setString(1, nulo(p.getNumeroPoliza()));
+            if (p.getIdCotizacion() > 0) {
+                ps.setInt(2, p.getIdCotizacion());
+            } else {
+                ps.setNull(2, java.sql.Types.INTEGER);
+            }
             ps.setInt(3, p.getIdVehiculo());
             ps.setInt(4, p.getIdCompania());
             ps.setInt(5, p.getIdUsuario());
@@ -61,11 +65,11 @@ public class PolizaModelo extends Conexion implements DAO {
             } else {
                 ps.setNull(7, java.sql.Types.INTEGER);
             }
-            ps.setString(8, p.getFechaEmision());
+            ps.setString(8, nulo(p.getFechaEmision()));
             ps.setString(9, p.getFechaInicio());
             ps.setString(10, p.getFechaVencimiento());
             ps.setDouble(11, p.getPrimaTotal());
-            ps.setString(12, p.getEstatus());
+            ps.setString(12, enumVal(p.getEstatus()));
             return ps.executeUpdate();
         } catch (SQLException ex) {
             System.out.println("Error: " + ex.getMessage());
@@ -81,8 +85,12 @@ public class PolizaModelo extends Conexion implements DAO {
             this.conectar();
             PolizaEntidad p = (PolizaEntidad) obj;
             ps = cnx.prepareStatement("UPDATE poliza SET numeroPoliza = ?, idCotizacion = ?, idVehiculo = ?, idCompania = ?, idUsuario = ?, idTipo = ?, idPolizaAnterior = ?, fechaEmision = ?, fechaInicio = ?, fechaVencimiento = ?, primaTotal = ?, estatus = ? WHERE idPoliza = ?");
-            ps.setString(1, p.getNumeroPoliza());
-            ps.setInt(2, p.getIdCotizacion());
+            ps.setString(1, nulo(p.getNumeroPoliza()));
+            if (p.getIdCotizacion() > 0) {
+                ps.setInt(2, p.getIdCotizacion());
+            } else {
+                ps.setNull(2, java.sql.Types.INTEGER);
+            }
             ps.setInt(3, p.getIdVehiculo());
             ps.setInt(4, p.getIdCompania());
             ps.setInt(5, p.getIdUsuario());
@@ -92,11 +100,11 @@ public class PolizaModelo extends Conexion implements DAO {
             } else {
                 ps.setNull(7, java.sql.Types.INTEGER);
             }
-            ps.setString(8, p.getFechaEmision());
+            ps.setString(8, nulo(p.getFechaEmision()));
             ps.setString(9, p.getFechaInicio());
             ps.setString(10, p.getFechaVencimiento());
             ps.setDouble(11, p.getPrimaTotal());
-            ps.setString(12, p.getEstatus());
+            ps.setString(12, enumVal(p.getEstatus()));
             ps.setInt(13, p.getIdPoliza());
             return ps.executeUpdate();
         } catch (SQLException ex) {

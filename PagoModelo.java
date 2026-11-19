@@ -17,8 +17,8 @@ public class PagoModelo extends Conexion implements DAO {
         try { conectar(); Pago p = (Pago) obj;
             ps = cnx.prepareStatement("INSERT INTO pago (idPoliza, numeroParcialidad, monto, fechaLimite, fechaPago, metodoPago, comprobante, estatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             ps.setInt(1, p.getIdPoliza()); ps.setInt(2, p.getNumeroParcialidad()); ps.setDouble(3, p.getMonto());
-            ps.setString(4, p.getFechaLimite()); ps.setString(5, p.getFechaPago()); ps.setString(6, p.getMetodoPago());
-            ps.setString(7, p.getComprobante()); ps.setString(8, p.getEstatus());
+            ps.setString(4, p.getFechaLimite()); ps.setString(5, nulo(p.getFechaPago())); ps.setString(6, enumVal(p.getMetodoPago()));
+            ps.setString(7, nulo(p.getComprobante())); ps.setString(8, enumVal(p.getEstatus()));
             return ps.executeUpdate();
         } catch(SQLException e) { return 0; } finally { close(); }
     }
@@ -26,8 +26,8 @@ public class PagoModelo extends Conexion implements DAO {
         try { conectar(); Pago p = (Pago) obj;
             ps = cnx.prepareStatement("UPDATE pago SET idPoliza = ?, numeroParcialidad = ?, monto = ?, fechaLimite = ?, fechaPago = ?, metodoPago = ?, comprobante = ?, estatus = ? WHERE idPago = ?");
             ps.setInt(1, p.getIdPoliza()); ps.setInt(2, p.getNumeroParcialidad()); ps.setDouble(3, p.getMonto());
-            ps.setString(4, p.getFechaLimite()); ps.setString(5, p.getFechaPago()); ps.setString(6, p.getMetodoPago());
-            ps.setString(7, p.getComprobante()); ps.setString(8, p.getEstatus()); ps.setInt(9, p.getIdPago());
+            ps.setString(4, p.getFechaLimite()); ps.setString(5, nulo(p.getFechaPago())); ps.setString(6, enumVal(p.getMetodoPago()));
+            ps.setString(7, nulo(p.getComprobante())); ps.setString(8, enumVal(p.getEstatus())); ps.setInt(9, p.getIdPago());
             return ps.executeUpdate();
         } catch(SQLException e) { return 0; } finally { close(); }
     }

@@ -11,6 +11,14 @@ public class Conexion {
     public PreparedStatement ps;
     public ResultSet rs;
 
+    protected String enumVal(String s) {
+        return s == null || s.trim().isEmpty() ? null : s.trim().toUpperCase();
+    }
+
+    protected String nulo(String s) {
+        return s == null || s.trim().isEmpty() ? null : s.trim();
+    }
+
     public void conectar() {
         try {
             cnx = DriverManager.getConnection("jdbc:mysql://localhost/polizas", "root", "");

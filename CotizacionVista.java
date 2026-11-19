@@ -52,10 +52,10 @@ public class CotizacionVista extends JPanel {
         txtCosto = crearTextField("0.0", 590, 90);
 
         lblOpcionesPago = crearLabel("Opciones Pago:", 450, 130);
-        txtOpcionesPago = crearTextField("Contado / Meses", 590, 130);
+        txtOpcionesPago = crearTextField("COMPLETO", 590, 130);
 
         lblEstatus = crearLabel("Estatus:", 450, 170);
-        txtEstatus = crearTextField("Pendiente / Aceptada", 590, 170);
+        txtEstatus = crearTextField("PENDIENTE", 590, 170);
 
         cmbCotizaciones = new JComboBox<>();
         cmbCotizaciones.setBounds(450, 210, 340, 30);

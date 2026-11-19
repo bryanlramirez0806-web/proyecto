@@ -46,7 +46,7 @@ public class UsuarioModelo extends Conexion implements DAO {
             ps.setString(1, u.getNombre());
             ps.setString(2, u.getTelefono());
             ps.setString(3, u.getCorreo());
-            ps.setString(4, u.getRol());
+            ps.setString(4, enumVal(u.getRol()));
             ps.setBoolean(5, true);
             return ps.executeUpdate();
         } catch (SQLException ex) {
@@ -66,7 +66,7 @@ public class UsuarioModelo extends Conexion implements DAO {
             ps.setString(1, u.getNombre());
             ps.setString(2, u.getTelefono());
             ps.setString(3, u.getCorreo());
-            ps.setString(4, u.getRol());
+            ps.setString(4, enumVal(u.getRol()));
             ps.setInt(5, u.getIdUsuario());
             return ps.executeUpdate();
         } catch (SQLException ex) {

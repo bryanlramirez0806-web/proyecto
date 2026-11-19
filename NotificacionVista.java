@@ -17,10 +17,10 @@ public class NotificacionVista extends JPanel {
         add(crearL("ID Notif:", 30, 50)); txtId = crearT("0", 130, 50);
         add(crearL("ID Póliza:", 30, 90)); txtIdPoliza = crearT("0", 130, 90);
         add(crearL("ID Usuario:", 30, 130)); txtIdUsuario = crearT("0", 130, 130);
-        add(crearL("Tipo:", 30, 170)); txtTipo = crearT("Renovación", 130, 170);
+        add(crearL("Tipo:", 30, 170)); txtTipo = crearT("VENCIMIENTO", 130, 170);
 
         add(crearL("Fecha:", 450, 50)); txtFecha = crearT("2026-11-17", 550, 50);
-        add(crearL("Medio:", 450, 90)); txtMedio = crearT("Correo / SMS", 550, 90);
+        add(crearL("Medio:", 450, 90)); txtMedio = crearT("WHATSAPP", 550, 90);
         add(crearL("Costo Ren:", 450, 130)); txtCosto = crearT("0.0", 550, 130);
 
         btnConsultar = new JButton("Consultar"); btnConsultar.setBounds(130, 220, 100, 30); add(btnConsultar);

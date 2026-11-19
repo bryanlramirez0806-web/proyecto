@@ -1,225 +1,234 @@
--- MariaDB dump 10.19  Distrib 10.4.32-MariaDB, for Win64 (AMD64)
---
--- Host: localhost    Database: Polizas
--- ------------------------------------------------------
--- Server version	10.4.32-MariaDB
+CREATE DATABASE IF NOT EXISTS polizas CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE polizas;
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+CREATE TABLE cliente (
+    idCliente INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(150) NOT NULL,
+    telefono VARCHAR(20) NOT NULL,
+    correo VARCHAR(100),
+    rfc VARCHAR(15) NOT NULL UNIQUE,
+    direccion VARCHAR(255),
+    medioContacto VARCHAR(50) CHECK (medioContacto IN ('WHATSAPP', 'CORREO', 'LLAMADA')),
+    activo BOOLEAN DEFAULT TRUE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Table structure for table `cliente`
---
+CREATE TABLE usuario (
+    idUsuario INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(150) NOT NULL,
+    telefono VARCHAR(20),
+    correo VARCHAR(100) NOT NULL,
+    rol VARCHAR(50) NOT NULL CHECK (rol IN ('ADMINISTRADOR', 'VENDEDOR', 'OPERACIONES')),
+    activo BOOLEAN DEFAULT TRUE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-DROP TABLE IF EXISTS `cliente`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `cliente` (
-  `idCliente` int(11) NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(150) NOT NULL,
-  `telefono` varchar(20) NOT NULL,
-  `correo` varchar(100) DEFAULT NULL,
-  `rfc` varchar(15) NOT NULL,
-  `direccion` varchar(255) DEFAULT NULL,
-  `medioContacto` varchar(50) DEFAULT NULL CHECK (`medioContacto` in ('WHATSAPP','CORREO','LLAMADA')),
-  `activo` tinyint(1) DEFAULT 1,
-  PRIMARY KEY (`idCliente`),
-  UNIQUE KEY `rfc` (`rfc`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE documento (
+    idDocumento INT AUTO_INCREMENT PRIMARY KEY,
+    idCliente INT NOT NULL,
+    tipo VARCHAR(50) NOT NULL CHECK (tipo IN ('INE', 'COMPROBANTE_DOMICILIO', 'TARJETA_CIRCULACION')),
+    fechaRecepcion DATE NOT NULL,
+    rutaArchivo VARCHAR(255) NOT NULL,
+    FOREIGN KEY (idCliente) REFERENCES cliente(idCliente) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `cliente`
---
+CREATE TABLE marca (
+    idMarca INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL UNIQUE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-LOCK TABLES `cliente` WRITE;
-/*!40000 ALTER TABLE `cliente` DISABLE KEYS */;
-INSERT INTO `cliente` VALUES (1,'Bryan Ram?rez','9847654321','bryan@correo.com','RAMB040101XYZ','Playa del Carmen, Q.Roo','WHATSAPP',1);
-/*!40000 ALTER TABLE `cliente` ENABLE KEYS */;
-UNLOCK TABLES;
+CREATE TABLE submarca (
+    idSubmarca INT AUTO_INCREMENT PRIMARY KEY,
+    idMarca INT NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
+    FOREIGN KEY (idMarca) REFERENCES marca(idMarca) ON UPDATE CASCADE,
+    UNIQUE (idMarca, nombre)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Table structure for table `cobertura`
---
+CREATE TABLE vehiculo (
+    idVehiculo INT AUTO_INCREMENT PRIMARY KEY,
+    idCliente INT NOT NULL,
+    idSubmarca INT NOT NULL,
+    modelo VARCHAR(20) NOT NULL,
+    tipoVehiculo VARCHAR(50) NOT NULL,
+    numeroSerie VARCHAR(50) NOT NULL UNIQUE,
+    placas VARCHAR(20) NOT NULL,
+    activo BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (idCliente) REFERENCES cliente(idCliente) ON UPDATE CASCADE,
+    FOREIGN KEY (idSubmarca) REFERENCES submarca(idSubmarca) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-DROP TABLE IF EXISTS `cobertura`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `cobertura` (
-  `idCobertura` int(11) NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(100) NOT NULL,
-  `descripcion` text DEFAULT NULL,
-  `activo` tinyint(1) DEFAULT 1,
-  PRIMARY KEY (`idCobertura`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE companiaseguros (
+    idCompania INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    telefono VARCHAR(20),
+    correo VARCHAR(100),
+    sitioValidacion VARCHAR(255),
+    activo BOOLEAN DEFAULT TRUE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `cobertura`
---
+CREATE TABLE tipopoliza (
+    idTipo INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT,
+    activo BOOLEAN DEFAULT TRUE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-LOCK TABLES `cobertura` WRITE;
-/*!40000 ALTER TABLE `cobertura` DISABLE KEYS */;
-INSERT INTO `cobertura` VALUES (1,'Da?os Materiales','Cubre los da?os sufridos por el veh?culo asegurado',1),(2,'Responsabilidad Civil','Cubre da?os a terceros en sus bienes y personas',1),(3,'Gastos M?dicos Occupantes','Cubre atenci?n m?dica para los pasajeros',1);
-/*!40000 ALTER TABLE `cobertura` ENABLE KEYS */;
-UNLOCK TABLES;
+CREATE TABLE cobertura (
+    idCobertura INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT,
+    activo BOOLEAN DEFAULT TRUE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Table structure for table `companiaseguros`
---
+CREATE TABLE cotizacion (
+    idCotizacion INT AUTO_INCREMENT PRIMARY KEY,
+    idVehiculo INT NOT NULL,
+    idUsuario INT NOT NULL,
+    idCompania INT NOT NULL,
+    idTipo INT NOT NULL,
+    fecha DATE NOT NULL,
+    costo DECIMAL(10,2) NOT NULL CHECK (costo > 0),
+    opcionPago VARCHAR(50) NOT NULL CHECK (opcionPago IN ('COMPLETO', 'PARCIALIDADES')),
+    estatus VARCHAR(50) NOT NULL CHECK (estatus IN ('PENDIENTE', 'ACEPTADA', 'RECHAZADA')),
+    FOREIGN KEY (idVehiculo) REFERENCES vehiculo(idVehiculo) ON UPDATE CASCADE,
+    FOREIGN KEY (idUsuario) REFERENCES usuario(idUsuario) ON UPDATE CASCADE,
+    FOREIGN KEY (idCompania) REFERENCES companiaseguros(idCompania) ON UPDATE CASCADE,
+    FOREIGN KEY (idTipo) REFERENCES tipopoliza(idTipo) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-DROP TABLE IF EXISTS `companiaseguros`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `companiaseguros` (
-  `idCompania` int(11) NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(100) NOT NULL,
-  `telefono` varchar(20) DEFAULT NULL,
-  `correo` varchar(100) DEFAULT NULL,
-  `sitioValidacion` varchar(255) DEFAULT NULL,
-  `activo` tinyint(1) DEFAULT 1,
-  PRIMARY KEY (`idCompania`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE poliza (
+    idPoliza INT AUTO_INCREMENT PRIMARY KEY,
+    numeroPoliza VARCHAR(50) DEFAULT NULL UNIQUE,
+    idCotizacion INT DEFAULT NULL UNIQUE,
+    idVehiculo INT NOT NULL,
+    idCompania INT NOT NULL,
+    idUsuario INT NOT NULL,
+    idTipo INT NOT NULL,
+    idPolizaAnterior INT DEFAULT NULL,
+    fechaEmision DATE DEFAULT NULL,
+    fechaInicio DATE NOT NULL,
+    fechaVencimiento DATE NOT NULL,
+    primaTotal DECIMAL(10,2) NOT NULL CHECK (primaTotal > 0),
+    estatus VARCHAR(50) NOT NULL CHECK (estatus IN ('EN_TRAMITE', 'ACTIVA', 'VENCIDA', 'CANCELADA')),
+    CONSTRAINT chk_fechas CHECK (fechaVencimiento > fechaInicio),
+    FOREIGN KEY (idCotizacion) REFERENCES cotizacion(idCotizacion) ON UPDATE CASCADE,
+    FOREIGN KEY (idVehiculo) REFERENCES vehiculo(idVehiculo) ON UPDATE CASCADE,
+    FOREIGN KEY (idCompania) REFERENCES companiaseguros(idCompania) ON UPDATE CASCADE,
+    FOREIGN KEY (idUsuario) REFERENCES usuario(idUsuario) ON UPDATE CASCADE,
+    FOREIGN KEY (idTipo) REFERENCES tipopoliza(idTipo) ON UPDATE CASCADE,
+    FOREIGN KEY (idPolizaAnterior) REFERENCES poliza(idPoliza) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `companiaseguros`
---
+CREATE TABLE detallecobertura (
+    idPoliza INT NOT NULL,
+    idCobertura INT NOT NULL,
+    sumaAsegurada DECIMAL(12,2) NOT NULL CHECK (sumaAsegurada > 0),
+    deducible DECIMAL(10,2) NOT NULL CHECK (deducible >= 0),
+    PRIMARY KEY (idPoliza, idCobertura),
+    FOREIGN KEY (idPoliza) REFERENCES poliza(idPoliza) ON UPDATE CASCADE,
+    FOREIGN KEY (idCobertura) REFERENCES cobertura(idCobertura) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-LOCK TABLES `companiaseguros` WRITE;
-/*!40000 ALTER TABLE `companiaseguros` DISABLE KEYS */;
-INSERT INTO `companiaseguros` VALUES (1,'GNP Seguros','8005002000','contacto@gnp.com.mx','https://www.gnp.com.mx/validar',1);
-/*!40000 ALTER TABLE `companiaseguros` ENABLE KEYS */;
-UNLOCK TABLES;
+CREATE TABLE pago (
+    idPago INT AUTO_INCREMENT PRIMARY KEY,
+    idPoliza INT NOT NULL,
+    numeroParcialidad INT NOT NULL,
+    monto DECIMAL(10,2) NOT NULL CHECK (monto > 0),
+    fechaLimite DATE NOT NULL,
+    fechaPago DATE DEFAULT NULL,
+    metodoPago VARCHAR(50) CHECK (metodoPago IN ('EFECTIVO', 'TARJETA', 'TRANSFERENCIA')),
+    comprobante VARCHAR(100),
+    estatus VARCHAR(50) NOT NULL CHECK (estatus IN ('PENDIENTE', 'PAGADO')),
+    FOREIGN KEY (idPoliza) REFERENCES poliza(idPoliza) ON UPDATE CASCADE,
+    UNIQUE (idPoliza, numeroParcialidad)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Table structure for table `marca`
---
+CREATE TABLE notificacion (
+    idNotificacion INT AUTO_INCREMENT PRIMARY KEY,
+    idPoliza INT NOT NULL,
+    idUsuario INT NOT NULL,
+    tipo VARCHAR(50) NOT NULL CHECK (tipo IN ('EMISION', 'VENCIMIENTO')),
+    fecha DATE NOT NULL,
+    medio VARCHAR(50) NOT NULL CHECK (medio IN ('WHATSAPP', 'CORREO', 'LLAMADA')),
+    costoRenovacion DECIMAL(10,2) NOT NULL CHECK (costoRenovacion >= 0),
+    realizada BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (idPoliza) REFERENCES poliza(idPoliza) ON UPDATE CASCADE,
+    FOREIGN KEY (idUsuario) REFERENCES usuario(idUsuario) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-DROP TABLE IF EXISTS `marca`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `marca` (
-  `idMarca` int(11) NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(100) NOT NULL,
-  PRIMARY KEY (`idMarca`),
-  UNIQUE KEY `nombre` (`nombre`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE cancelacion (
+    idCancelacion INT AUTO_INCREMENT PRIMARY KEY,
+    idPoliza INT NOT NULL UNIQUE,
+    idUsuario INT NOT NULL,
+    fechaSolicitud DATE NOT NULL,
+    motivo TEXT NOT NULL,
+    montoDevolucion DECIMAL(10,2) NOT NULL CHECK (montoDevolucion >= 0),
+    estatusDevolucion VARCHAR(50) NOT NULL CHECK (estatusDevolucion IN ('NO_APLICA', 'PENDIENTE', 'REALIZADA')),
+    FOREIGN KEY (idPoliza) REFERENCES poliza(idPoliza) ON UPDATE CASCADE,
+    FOREIGN KEY (idUsuario) REFERENCES usuario(idUsuario) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `marca`
---
+INSERT INTO usuario (nombre, telefono, correo, rol) VALUES
+('Bryan Ramírez', '9846721713', 'bryan@despacho.com', 'VENDEDOR'),
+('Diego Cruz', '9851234567', 'diego@despacho.com', 'ADMINISTRADOR'),
+('Jonathan Alonso', '9842345678', 'jonathan@despacho.com', 'OPERACIONES');
 
-LOCK TABLES `marca` WRITE;
-/*!40000 ALTER TABLE `marca` DISABLE KEYS */;
-INSERT INTO `marca` VALUES (2,'Chevrolet'),(1,'Nissan');
-/*!40000 ALTER TABLE `marca` ENABLE KEYS */;
-UNLOCK TABLES;
+INSERT INTO cliente (nombre, telefono, correo, rfc, direccion, medioContacto) VALUES
+('Carlos Mendoza López', '9847654321', 'carlos.mendoza@correo.com', 'MELC850214AB3', 'Calle 10 Norte 245, Playa del Carmen, Q. Roo', 'WHATSAPP'),
+('María Fernández Ortiz', '9846176891', 'maria.fernandez@correo.com', 'FEOM900530HK1', 'Av. Constituyentes 120, Playa del Carmen, Q. Roo', 'CORREO'),
+('Luis Herrera Castillo', '9856677627', 'luis.herrera@correo.com', 'HECL781122PQ7', 'Calle Cedros 33, Playa del Carmen, Q. Roo', 'LLAMADA');
 
---
--- Table structure for table `submarca`
---
+INSERT INTO documento (idCliente, tipo, fechaRecepcion, rutaArchivo) VALUES
+(1, 'INE', '2026-11-10', 'C:/documentos/cliente1/ine.pdf'),
+(1, 'COMPROBANTE_DOMICILIO', '2026-11-10', 'C:/documentos/cliente1/domicilio.pdf'),
+(1, 'TARJETA_CIRCULACION', '2026-11-10', 'C:/documentos/cliente1/tarjeta.pdf'),
+(2, 'INE', '2026-11-12', 'C:/documentos/cliente2/ine.pdf');
 
-DROP TABLE IF EXISTS `submarca`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `submarca` (
-  `idSubmarca` int(11) NOT NULL AUTO_INCREMENT,
-  `idMarca` int(11) NOT NULL,
-  `nombre` varchar(100) NOT NULL,
-  PRIMARY KEY (`idSubmarca`),
-  UNIQUE KEY `idMarca` (`idMarca`,`nombre`),
-  CONSTRAINT `submarca_ibfk_1` FOREIGN KEY (`idMarca`) REFERENCES `marca` (`idMarca`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+INSERT INTO marca (nombre) VALUES ('Nissan'), ('Chevrolet'), ('Toyota'), ('Volkswagen');
 
---
--- Dumping data for table `submarca`
---
+INSERT INTO submarca (idMarca, nombre) VALUES
+(1, 'Versa'), (1, 'Sentra'), (2, 'Aveo'), (2, 'Onix'), (3, 'Corolla'), (4, 'Jetta');
 
-LOCK TABLES `submarca` WRITE;
-/*!40000 ALTER TABLE `submarca` DISABLE KEYS */;
-INSERT INTO `submarca` VALUES (2,1,'Sentra'),(1,1,'Versa'),(3,2,'Aveo');
-/*!40000 ALTER TABLE `submarca` ENABLE KEYS */;
-UNLOCK TABLES;
+INSERT INTO vehiculo (idCliente, idSubmarca, modelo, tipoVehiculo, numeroSerie, placas) VALUES
+(1, 1, '2024', 'Sedán', '3N1CN7AD4RK123456', 'UTV-123-A'),
+(2, 5, '2023', 'Sedán', '5YFBURHE5PP654321', 'UTW-456-B'),
+(3, 4, '2022', 'Hatchback', '3G1J85CC5NS987654', 'UTX-789-C');
 
---
--- Table structure for table `tipopoliza`
---
+INSERT INTO companiaseguros (nombre, telefono, correo, sitioValidacion) VALUES
+('GNP Seguros', '8005002000', 'contacto@gnp.com.mx', 'https://www.gnp.com.mx/validar'),
+('Qualitas', '8007002262', 'contacto@qualitas.com.mx', 'https://www.qualitas.com.mx/validar');
 
-DROP TABLE IF EXISTS `tipopoliza`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `tipopoliza` (
-  `idTipo` int(11) NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(100) NOT NULL,
-  `descripcion` text DEFAULT NULL,
-  `activo` tinyint(1) DEFAULT 1,
-  PRIMARY KEY (`idTipo`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+INSERT INTO tipopoliza (nombre, descripcion) VALUES
+('Amplia', 'Cobertura completa que incluye daños materiales y robo total'),
+('Limitada', 'Cubre responsabilidad civil y robo total del vehículo'),
+('Daños a Terceros', 'Cubre únicamente los daños causados a terceros');
 
---
--- Dumping data for table `tipopoliza`
---
+INSERT INTO cobertura (nombre, descripcion) VALUES
+('Daños Materiales', 'Cubre los daños sufridos por el vehículo asegurado'),
+('Robo Total', 'Cubre el robo total del vehículo asegurado'),
+('Responsabilidad Civil', 'Cubre daños a terceros en sus bienes y personas'),
+('Gastos Médicos Ocupantes', 'Cubre la atención médica de los ocupantes del vehículo');
 
-LOCK TABLES `tipopoliza` WRITE;
-/*!40000 ALTER TABLE `tipopoliza` DISABLE KEYS */;
-INSERT INTO `tipopoliza` VALUES (1,'Amplia','Cobertura completa que incluye da?os materiales y robo total',1),(2,'Limitada','Cubre responsabilidad civil y robo total del veh?culo',1);
-/*!40000 ALTER TABLE `tipopoliza` ENABLE KEYS */;
-UNLOCK TABLES;
+INSERT INTO cotizacion (idVehiculo, idUsuario, idCompania, idTipo, fecha, costo, opcionPago, estatus) VALUES
+(1, 1, 1, 1, '2026-11-10', 12500.00, 'COMPLETO', 'ACEPTADA'),
+(2, 1, 2, 2, '2026-11-12', 8400.00, 'PARCIALIDADES', 'ACEPTADA'),
+(3, 1, 1, 3, '2026-11-14', 5200.00, 'COMPLETO', 'PENDIENTE');
 
---
--- Table structure for table `vehiculo`
---
+INSERT INTO poliza (numeroPoliza, idCotizacion, idVehiculo, idCompania, idUsuario, idTipo, fechaEmision, fechaInicio, fechaVencimiento, primaTotal, estatus) VALUES
+('GNP-2026-0001', 1, 1, 1, 1, 1, '2026-11-11', '2026-11-11', '2027-11-11', 12500.00, 'ACTIVA');
 
-DROP TABLE IF EXISTS `vehiculo`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `vehiculo` (
-  `idVehiculo` int(11) NOT NULL AUTO_INCREMENT,
-  `idCliente` int(11) NOT NULL,
-  `idSubmarca` int(11) NOT NULL,
-  `modelo` varchar(20) NOT NULL,
-  `tipoVehiculo` varchar(50) NOT NULL,
-  `numeroSerie` varchar(50) NOT NULL,
-  `placas` varchar(20) NOT NULL,
-  `activo` tinyint(1) DEFAULT 1,
-  PRIMARY KEY (`idVehiculo`),
-  UNIQUE KEY `numeroSerie` (`numeroSerie`),
-  KEY `idCliente` (`idCliente`),
-  KEY `idSubmarca` (`idSubmarca`),
-  CONSTRAINT `vehiculo_ibfk_1` FOREIGN KEY (`idCliente`) REFERENCES `cliente` (`idCliente`) ON UPDATE CASCADE,
-  CONSTRAINT `vehiculo_ibfk_2` FOREIGN KEY (`idSubmarca`) REFERENCES `submarca` (`idSubmarca`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+INSERT INTO poliza (numeroPoliza, idCotizacion, idVehiculo, idCompania, idUsuario, idTipo, fechaEmision, fechaInicio, fechaVencimiento, primaTotal, estatus) VALUES
+(NULL, 2, 2, 2, 1, 2, NULL, '2026-11-20', '2027-11-20', 8400.00, 'EN_TRAMITE');
 
---
--- Dumping data for table `vehiculo`
---
+INSERT INTO detallecobertura (idPoliza, idCobertura, sumaAsegurada, deducible) VALUES
+(1, 1, 250000.00, 5000.00),
+(1, 2, 250000.00, 0.00),
+(1, 3, 3000000.00, 0.00),
+(2, 3, 3000000.00, 0.00);
 
-LOCK TABLES `vehiculo` WRITE;
-/*!40000 ALTER TABLE `vehiculo` DISABLE KEYS */;
-INSERT INTO `vehiculo` VALUES (1,1,1,'2024','Sed?n','3N1AB8CV8KL123456','UTV-123-A',1);
-/*!40000 ALTER TABLE `vehiculo` ENABLE KEYS */;
-UNLOCK TABLES;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+INSERT INTO pago (idPoliza, numeroParcialidad, monto, fechaLimite, fechaPago, metodoPago, comprobante, estatus) VALUES
+(1, 1, 12500.00, '2026-11-11', '2026-11-11', 'TARJETA', 'COMP-0001', 'PAGADO'),
+(2, 1, 4200.00, '2026-11-20', NULL, NULL, NULL, 'PENDIENTE'),
+(2, 2, 4200.00, '2026-12-20', NULL, NULL, NULL, 'PENDIENTE');
 
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
--- Dump completed on 2026-11-17 15:31:13
+INSERT INTO notificacion (idPoliza, idUsuario, tipo, fecha, medio, costoRenovacion, realizada) VALUES
+(1, 1, 'EMISION', '2026-11-11', 'WHATSAPP', 0.00, 1);

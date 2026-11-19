@@ -68,7 +68,7 @@ public class PolizaVista extends JPanel {
         txtPrimaTotal = crearTextField("0.0", 780, 90);
 
         crearLabel("Estatus:", 680, 130);
-        txtEstatus = crearTextField("Activa", 780, 130);
+        txtEstatus = crearTextField("EN_TRAMITE", 780, 130);
 
         cmbPolizas = new JComboBox<>();
         cmbPolizas.setBounds(680, 170, 270, 30);

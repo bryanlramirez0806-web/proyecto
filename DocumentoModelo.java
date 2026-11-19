@@ -16,14 +16,14 @@ public class DocumentoModelo extends Conexion implements DAO {
     @Override public int create(Object obj) {
         try { conectar(); Documento d = (Documento) obj;
             ps = cnx.prepareStatement("INSERT INTO documento (idCliente, tipo, fechaRecepcion, rutaArchivo) VALUES (?, ?, ?, ?)");
-            ps.setInt(1, d.getIdCliente()); ps.setString(2, d.getTipo()); ps.setString(3, d.getFechaRecepcion()); ps.setString(4, d.getRutaArchivo());
+            ps.setInt(1, d.getIdCliente()); ps.setString(2, enumVal(d.getTipo())); ps.setString(3, d.getFechaRecepcion()); ps.setString(4, d.getRutaArchivo());
             return ps.executeUpdate();
         } catch(SQLException e) { return 0; } finally { close(); }
     }
     @Override public int update(Object obj) {
         try { conectar(); Documento d = (Documento) obj;
             ps = cnx.prepareStatement("UPDATE documento SET idCliente = ?, tipo = ?, fechaRecepcion = ?, rutaArchivo = ? WHERE idDocumento = ?");
-            ps.setInt(1, d.getIdCliente()); ps.setString(2, d.getTipo()); ps.setString(3, d.getFechaRecepcion()); ps.setString(4, d.getRutaArchivo()); ps.setInt(5, d.getIdDocumento());
+            ps.setInt(1, d.getIdCliente()); ps.setString(2, enumVal(d.getTipo())); ps.setString(3, d.getFechaRecepcion()); ps.setString(4, d.getRutaArchivo()); ps.setInt(5, d.getIdDocumento());
             return ps.executeUpdate();
         } catch(SQLException e) { return 0; } finally { close(); }
     }

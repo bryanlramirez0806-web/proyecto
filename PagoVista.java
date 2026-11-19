@@ -21,9 +21,9 @@ public class PagoVista extends JPanel {
         add(crearL("F. Límite:", 30, 210)); txtFLimite = crearT("2026-12-31", 130, 210);
 
         add(crearL("F. Pago:", 450, 50)); txtFPago = crearT("2026-11-17", 550, 50);
-        add(crearL("Método:", 450, 90)); txtMetodo = crearT("Transferencia", 550, 90);
+        add(crearL("Método:", 450, 90)); txtMetodo = crearT("EFECTIVO", 550, 90);
         add(crearL("Comprobante:", 450, 130)); txtComprobante = crearT("COMP-123", 550, 130);
-        add(crearL("Estatus:", 450, 170)); txtEstatus = crearT("Pagado", 550, 170);
+        add(crearL("Estatus:", 450, 170)); txtEstatus = crearT("PAGADO", 550, 170);
 
         btnConsultar = new JButton("Consultar"); btnConsultar.setBounds(150, 260, 100, 30); add(btnConsultar);
         btnAgregar = new JButton("Agregar"); btnAgregar.setBounds(260, 260, 100, 30); add(btnAgregar);

@@ -21,7 +21,7 @@ public class CancelacionVista extends JPanel {
 
         add(crearL("Motivo:", 450, 50)); txtMotivo = crearT("Motivo", 560, 50);
         add(crearL("Monto Dev:", 450, 90)); txtMonto = crearT("0.0", 560, 90);
-        add(crearL("Estatus Dev:", 450, 130)); txtEstatus = crearT("Pendiente", 560, 130);
+        add(crearL("Estatus Dev:", 450, 130)); txtEstatus = crearT("PENDIENTE", 560, 130);
 
         btnConsultar = new JButton("Consultar"); btnConsultar.setBounds(140, 220, 100, 30); add(btnConsultar);
         btnAgregar = new JButton("Agregar"); btnAgregar.setBounds(250, 220, 100, 30); add(btnAgregar);
