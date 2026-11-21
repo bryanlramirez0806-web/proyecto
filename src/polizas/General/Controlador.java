@@ -53,9 +53,9 @@ public class Controlador {
         vista.home.addActionListener(e -> {
             JPanel panelHome = new JPanel(null);
             panelHome.setBackground(new Color(40, 40, 40));
-            JLabel lblHome = new JLabel("Panel Home");
+            JLabel lblHome = new JLabel("Bienvenido al Gestor de Pólizas. Abre los módulos desde el menú Base de Datos.");
             lblHome.setForeground(Color.WHITE);
-            lblHome.setBounds(400, 20, 200, 30);
+            lblHome.setBounds(250, 20, 600, 30);
             panelHome.add(lblHome);
             mostrarPanel(panelHome, "home");
         });

@@ -32,7 +32,7 @@ public class Bienvenida extends JFrame {
         // Panel izquierdo
         pi = new JPanel();
         pi.setBackground(new Color(30, 30, 30));
-        JLabel lblIzq = new JLabel("Panel izquierdo");
+        JLabel lblIzq = new JLabel("Gestor de Pólizas");
         lblIzq.setForeground(Color.white);
         pi.add(lblIzq);
         pi.setPreferredSize(new Dimension(200, getHeight()));
@@ -40,7 +40,7 @@ public class Bienvenida extends JFrame {
         // Panel Superior
         ps = new JPanel();
         ps.setBackground(new Color(20, 40, 80));
-        JLabel titulo = new JLabel("Sistema de Gestión...");
+        JLabel titulo = new JLabel("Sistema de Gestión de Pólizas");
         titulo.setForeground(Color.white);
         Font fuente = new Font("Arial", Font.BOLD, 18);
         titulo.setFont(fuente);
@@ -51,7 +51,7 @@ public class Bienvenida extends JFrame {
         pc = new JPanel(cl);
         pc.setBackground(new Color(40, 40, 40));
 
-        JLabel lblWelcome = new JLabel("Welcome to Java ...");
+        JLabel lblWelcome = new JLabel("Bienvenido al Gestor de Pólizas. Abre los módulos desde el menú Base de Datos.", javax.swing.SwingConstants.CENTER);
         lblWelcome.setForeground(Color.white);
         pc.add(lblWelcome, "home");
         pc.add(new Mensaje(), "mensaje");
@@ -60,7 +60,7 @@ public class Bienvenida extends JFrame {
         // Panel derecho
         pd = new JPanel();
         pd.setBackground(new Color(30, 30, 30));
-        JLabel lblDer = new JLabel("Panel derecho");
+        JLabel lblDer = new JLabel("Equipo 5");
         lblDer.setForeground(Color.white);
         pd.add(lblDer);
         pd.setPreferredSize(new Dimension(200, getHeight()));
