@@ -6,7 +6,7 @@ import javax.swing.table.AbstractTableModel;
 
 public class VehiculoTM extends AbstractTableModel {
     protected List<Vehiculo> vehiculoLista;
-    protected String[] encabezados = {"ID Vehículo", "ID Cliente", "ID Submarca", "Modelo", "Tipo", "N° Serie", "Placas", "Activo"};
+    protected String[] encabezados = {"ID", "Cliente", "Marca y submarca", "Modelo", "Tipo", "N° Serie", "Placas", "Activo"};
 
     public VehiculoTM() {
         vehiculoLista = new ArrayList<>();
@@ -22,8 +22,6 @@ public class VehiculoTM extends AbstractTableModel {
     public Class<?> getColumnClass(int columnIndex) {
         switch (columnIndex) {
             case 0:
-            case 1:
-            case 2:
                 return Integer.class;
             case 7:
                 return Boolean.class;
@@ -61,8 +59,8 @@ public class VehiculoTM extends AbstractTableModel {
             Vehiculo v = vehiculoLista.get(rowIndex);
             switch (columnIndex) {
                 case 0: return v.getIdVehiculo();
-                case 1: return v.getIdCliente();
-                case 2: return v.getIdSubmarca();
+                case 1: return v.getNombreCliente();
+                case 2: return v.getNombreSubmarca();
                 case 3: return v.getModelo();
                 case 4: return v.getTipoVehiculo();
                 case 5: return v.getNumeroSerie();

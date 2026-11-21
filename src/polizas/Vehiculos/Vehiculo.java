@@ -1,14 +1,18 @@
 package polizas.Vehiculos;
 
 public class Vehiculo {
-    protected int idVehiculo;
-    protected int idCliente;
-    protected int idSubmarca;
-    protected String modelo;
-    protected String tipoVehiculo;
-    protected String numeroSerie;
-    protected String placas;
-    protected boolean activo;
+    private int idVehiculo;
+    private int idCliente;
+    private int idSubmarca;
+    private String modelo;
+    private String tipoVehiculo;
+    private String numeroSerie;
+    private String placas;
+    private boolean activo;
+
+    // Solo para mostrar en la tabla (vienen de un JOIN, no se guardan en vehiculo)
+    private String nombreCliente = "";
+    private String nombreSubmarca = "";
 
     public Vehiculo(int idVehiculo, int idCliente, int idSubmarca, String modelo, String tipoVehiculo, String numeroSerie, String placas, boolean activo) {
         this.idVehiculo = idVehiculo;
@@ -45,11 +49,15 @@ public class Vehiculo {
     public boolean isActivo() { return activo; }
     public void setActivo(boolean activo) { this.activo = activo; }
 
+    public String getNombreCliente() { return nombreCliente; }
+    public void setNombreCliente(String nombreCliente) { this.nombreCliente = nombreCliente; }
+
+    public String getNombreSubmarca() { return nombreSubmarca; }
+    public void setNombreSubmarca(String nombreSubmarca) { this.nombreSubmarca = nombreSubmarca; }
+
     @Override
     public String toString() {
-        String placaTexto = (this.placas != null && !this.placas.trim().isEmpty())
-                ? this.placas.trim()
-                : "Sin placas";
-        return "Vehículo #" + this.idVehiculo + " (Submarca ID: " + this.idSubmarca + " - " + placaTexto + ")";
+        // Se usa en el JComboBox de Pólizas: "UTV-123-A - Nissan Versa 2024"
+        return this.placas + " - " + this.nombreSubmarca + " " + this.modelo;
     }
 }
