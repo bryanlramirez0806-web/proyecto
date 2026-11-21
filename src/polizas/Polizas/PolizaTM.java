@@ -7,7 +7,7 @@ import javax.swing.table.AbstractTableModel;
 public class PolizaTM extends AbstractTableModel {
     protected List<PolizaEntidad> polizaLista;
     protected String[] encabezados = {
-        "ID", "N° Póliza", "Cot.", "Veh.", "Comp.", "Usu.", "Tipo", "Ant.",
+        "ID", "N° Póliza", "Cliente", "Placas", "Compañía", "Tipo", "Cot.", "Ant.",
         "Emisión", "Inicio", "Vencimiento", "Prima Total", "Estatus"
     };
 
@@ -51,11 +51,11 @@ public class PolizaTM extends AbstractTableModel {
             switch (columnIndex) {
                 case 0: return p.getIdPoliza();
                 case 1: return p.getNumeroPoliza();
-                case 2: return p.getIdCotizacion();
-                case 3: return p.getIdVehiculo();
-                case 4: return p.getIdCompania();
-                case 5: return p.getIdUsuario();
-                case 6: return p.getIdTipo();
+                case 2: return p.getNombreCliente();
+                case 3: return p.getPlacas();
+                case 4: return p.getNombreCompania();
+                case 5: return p.getNombreTipo();
+                case 6: return p.getIdCotizacion() > 0 ? p.getIdCotizacion() : null;
                 case 7: return p.getIdPolizaAnterior();
                 case 8: return p.getFechaEmision();
                 case 9: return p.getFechaInicio();

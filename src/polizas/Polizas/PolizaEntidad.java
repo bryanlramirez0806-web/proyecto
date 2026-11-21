@@ -1,19 +1,29 @@
 package polizas.Polizas;
 
+/**
+ * Póliza de seguro. Se llama PolizaEntidad (y no Poliza) porque el paquete
+ * ya se llama "Polizas" y así no se confunden al leer el código.
+ */
 public class PolizaEntidad {
-    protected int idPoliza;
-    protected String numeroPoliza;
-    protected int idCotizacion;
-    protected int idVehiculo;
-    protected int idCompania;
-    protected int idUsuario;
-    protected int idTipo;
-    protected Integer idPolizaAnterior;
-    protected String fechaEmision;
-    protected String fechaInicio;
-    protected String fechaVencimiento;
-    protected double primaTotal;
-    protected String estatus;
+    private int idPoliza;
+    private String numeroPoliza;
+    private int idCotizacion;
+    private int idVehiculo;
+    private int idCompania;
+    private int idUsuario;
+    private int idTipo;
+    private Integer idPolizaAnterior;
+    private String fechaEmision;
+    private String fechaInicio;
+    private String fechaVencimiento;
+    private double primaTotal;
+    private String estatus;
+
+    // Solo para mostrar en la tabla (vienen de un JOIN, no se guardan en poliza)
+    private String nombreCliente = "";
+    private String placas = "";
+    private String nombreCompania = "";
+    private String nombreTipo = "";
 
     public PolizaEntidad(int idPoliza, String numeroPoliza, int idCotizacion, int idVehiculo, int idCompania, int idUsuario, int idTipo, Integer idPolizaAnterior, String fechaEmision, String fechaInicio, String fechaVencimiento, double primaTotal, String estatus) {
         this.idPoliza = idPoliza;
@@ -69,6 +79,18 @@ public class PolizaEntidad {
 
     public String getEstatus() { return estatus; }
     public void setEstatus(String estatus) { this.estatus = estatus; }
+
+    public String getNombreCliente() { return nombreCliente; }
+    public void setNombreCliente(String nombreCliente) { this.nombreCliente = nombreCliente; }
+
+    public String getPlacas() { return placas; }
+    public void setPlacas(String placas) { this.placas = placas; }
+
+    public String getNombreCompania() { return nombreCompania; }
+    public void setNombreCompania(String nombreCompania) { this.nombreCompania = nombreCompania; }
+
+    public String getNombreTipo() { return nombreTipo; }
+    public void setNombreTipo(String nombreTipo) { this.nombreTipo = nombreTipo; }
 
     @Override
     public String toString() {
