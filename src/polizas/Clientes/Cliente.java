@@ -1,20 +1,20 @@
 package polizas.Clientes;
 
-public class Cliente {
-    protected int idCliente;
-    protected String nombre;
-    protected String telefono;
-    protected String correo;
-    protected String rfc;
-    protected String direccion;
-    protected String medioContacto;
-    protected boolean activo;
+import polizas.General.Persona;
+
+/**
+ * Cliente del despacho. Hereda de Persona el nombre, teléfono y correo.
+ */
+public class Cliente extends Persona {
+    private int idCliente;
+    private String rfc;
+    private String direccion;
+    private String medioContacto;
+    private boolean activo;
 
     public Cliente(int idCliente, String nombre, String telefono, String correo, String rfc, String direccion, String medioContacto, boolean activo) {
+        super(nombre, telefono, correo);
         this.idCliente = idCliente;
-        this.nombre = nombre;
-        this.telefono = telefono;
-        this.correo = correo;
         this.rfc = rfc;
         this.direccion = direccion;
         this.medioContacto = medioContacto;
@@ -27,30 +27,6 @@ public class Cliente {
 
     public void setIdCliente(int idCliente) {
         this.idCliente = idCliente;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getTelefono() {
-        return telefono;
-    }
-
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
-    }
-
-    public String getCorreo() {
-        return correo;
-    }
-
-    public void setCorreo(String correo) {
-        this.correo = correo;
     }
 
     public String getRfc() {
@@ -87,9 +63,6 @@ public class Cliente {
 
     @Override
     public String toString() {
-        if (this.nombre != null && !this.nombre.trim().isEmpty()) {
-            return this.nombre;
-        }
-        return "Cliente #" + this.idCliente;
+        return this.nombre; // Muestra el nombre del cliente en los JComboBox
     }
 }
