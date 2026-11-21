@@ -87,6 +87,9 @@ public class Cliente {
 
     @Override
     public String toString() {
-        return this.nombre; // Permite mostrar el nombre del cliente en JComboBox si se requiere
+        if (this.nombre != null && !this.nombre.trim().isEmpty()) {
+            return this.nombre;
+        }
+        return "Cliente #" + this.idCliente;
     }
 }

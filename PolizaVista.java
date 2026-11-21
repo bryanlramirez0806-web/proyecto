@@ -1,6 +1,5 @@
 package polizas.Polizas;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.util.List;
 import javax.swing.JButton;
@@ -54,11 +53,11 @@ public class PolizaVista extends JPanel {
         crearLabel("ID Póliza Ant.:", 350, 130);
         txtIdPolizaAnterior = crearTextField("0", 470, 130);
 
-        crearLabel("Emisión (AAAA-MM-DD):", 350, 170);
+        crearLabel("Fecha Emisión:", 350, 170);
         txtFechaEmision = crearTextField("2026-11-17", 470, 170);
 
-        crearLabel("Inicio (AAAA-MM-DD):", 350, 210);
-        txtFechaInicio = crearTextField("2026-11-17", 470, 170); // Ajustado verticalmente abajo
+        crearLabel("Fecha Inicio:", 350, 210);
+        txtFechaInicio = crearTextField("2026-11-17", 470, 210);
 
         // Columna 3 (Vencimiento, Costo, Estatus)
         crearLabel("Vencimiento:", 680, 50);
@@ -73,10 +72,6 @@ public class PolizaVista extends JPanel {
         cmbPolizas = new JComboBox<>();
         cmbPolizas.setBounds(680, 170, 270, 30);
         add(cmbPolizas);
-
-        // Corregir posiciones solapadas de etiquetas y campos en columna 2 y 3 si es necesario, adaptándolas limpiamente:
-        // Ajustemos txtFechaInicio bien:
-        txtFechaInicio.setBounds(470, 210, 180, 30);
 
         // Botones CRUD
         btnConsultar = new JButton("Consultar");

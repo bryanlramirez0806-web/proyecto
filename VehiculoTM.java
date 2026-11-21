@@ -6,7 +6,6 @@ import javax.swing.table.AbstractTableModel;
 
 public class VehiculoTM extends AbstractTableModel {
     protected List<Vehiculo> vehiculoLista;
-    // Se actualiza el encabezado para mostrar "ID Submarca" en lugar de Marca y Submarca separadas
     protected String[] encabezados = {"ID Vehículo", "ID Cliente", "ID Submarca", "Modelo", "Tipo", "N° Serie", "Placas", "Activo"};
 
     public VehiculoTM() {
@@ -17,6 +16,20 @@ public class VehiculoTM extends AbstractTableModel {
     @Override
     public String getColumnName(int cantidad) {
         return encabezados[cantidad];
+    }
+
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+        switch (columnIndex) {
+            case 0:
+            case 1:
+            case 2:
+                return Integer.class;
+            case 7:
+                return Boolean.class;
+            default:
+                return String.class;
+        }
     }
 
     public void setColumnNames(String[] nuevosNombres) {
@@ -44,12 +57,12 @@ public class VehiculoTM extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        if (rowIndex > -1) {
+        if (rowIndex > -1 && rowIndex < vehiculoLista.size()) {
             Vehiculo v = vehiculoLista.get(rowIndex);
             switch (columnIndex) {
                 case 0: return v.getIdVehiculo();
                 case 1: return v.getIdCliente();
-                case 2: return v.getIdSubmarca(); // Reemplazado Marca por ID Submarca
+                case 2: return v.getIdSubmarca();
                 case 3: return v.getModelo();
                 case 4: return v.getTipoVehiculo();
                 case 5: return v.getNumeroSerie();
@@ -81,6 +94,6 @@ public class VehiculoTM extends AbstractTableModel {
     }
 
     public void llenar(List<Vehiculo> lista) {
-        this.vehiculoLista = lista;
+        this.vehiculoLista = (lista != null) ? lista : new ArrayList<>();
     }
 }

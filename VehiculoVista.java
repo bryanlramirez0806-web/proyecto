@@ -1,6 +1,5 @@
 package polizas.Vehiculos;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.util.List;
 import javax.swing.JButton;
@@ -101,8 +100,10 @@ public class VehiculoVista extends JPanel {
         vehiculoModelo.fireTableDataChanged();
 
         cmbVehiculos.removeAllItems();
-        for (Vehiculo v : lista) {
-            cmbVehiculos.addItem(v);
+        if (lista != null) {
+            for (Vehiculo v : lista) {
+                cmbVehiculos.addItem(v);
+            }
         }
     }
 }

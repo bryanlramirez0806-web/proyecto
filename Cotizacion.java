@@ -10,7 +10,7 @@ public class Cotizacion {
     protected int idTipo;
     protected String fecha; // Usaremos String o Date según prefieras el manejo plano de texto en la vista
     protected double costo;
-    protected String opcionesPago;
+    protected String opcionPago;
     protected String estatus;
 
     public Cotizacion(int idCotizacion, int idVehiculo, int idUsuario, int idCompania, int idTipo, String fecha, double costo, String opcionesPago, String estatus) {
@@ -21,7 +21,7 @@ public class Cotizacion {
         this.idTipo = idTipo;
         this.fecha = fecha;
         this.costo = costo;
-        this.opcionesPago = opcionesPago;
+        this.opcionPago = opcionesPago;
         this.estatus = estatus;
     }
 
@@ -46,8 +46,8 @@ public class Cotizacion {
     public double getCosto() { return costo; }
     public void setCosto(double costo) { this.costo = costo; }
 
-    public String getOpcionesPago() { return opcionesPago; }
-    public void setOpcionesPago(String opcionesPago) { this.opcionesPago = opcionesPago; }
+    public String getOpcionesPago() { return opcionPago; }
+    public void setOpcionesPago(String opcionesPago) { this.opcionPago = opcionesPago; }
 
     public String getEstatus() { return estatus; }
     public void setEstatus(String estatus) { this.estatus = estatus; }

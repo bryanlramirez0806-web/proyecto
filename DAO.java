@@ -2,17 +2,17 @@ package polizas.General;
 
 import java.util.List;
 
-public abstract interface DAO {
-    
-    //Metodo original de Agregar
+public interface DAO {
+
+    // Método original de Agregar
     int create(Object obj);
-    
-    //Metodo original de Consultar
+
+    // Método original de Consultar
     List read();
-    
-    //Metodo original de Actualizar
-    int update(Object lista);
-    
-    //Metodo original de Eliminar
+
+    // Método original de Actualizar
+    int update(Object obj);
+
+    // Método original de Eliminar
     int delete(Object obj);
 }

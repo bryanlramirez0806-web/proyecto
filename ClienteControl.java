@@ -15,6 +15,14 @@ public class ClienteControl {
         clienteEventos();
     }
 
+    private boolean nombreInvalido(String nombre) {
+        if (nombre == null) {
+            return true;
+        }
+        String limpio = nombre.trim();
+        return limpio.isEmpty() || limpio.equalsIgnoreCase("Nombre completo");
+    }
+
     public void clienteEventos() {
         // Consultar
         cv.btnConsultar.addActionListener(e -> {
@@ -24,20 +32,20 @@ public class ClienteControl {
 
         // Agregar
         cv.btnAgregar.addActionListener(e -> {
-            String nombre = cv.txtNombre.getText();
-            if (nombre.trim().isEmpty() || nombre.equals("Nombre completo")) {
+            String nombre = cv.txtNombre.getText().trim();
+            if (nombreInvalido(nombre)) {
                 JOptionPane.showMessageDialog(cv, "Ingresa un nombre válido.", "Advertencia", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
             Cliente c = new Cliente(
                 0,
-                cv.txtNombre.getText(),
-                cv.txtTelefono.getText(),
-                cv.txtCorreo.getText(),
-                cv.txtRfc.getText(),
-                cv.txtDireccion.getText(),
-                cv.txtMedioContacto.getText(),
+                nombre,
+                cv.txtTelefono.getText().trim(),
+                cv.txtCorreo.getText().trim(),
+                cv.txtRfc.getText().trim().toUpperCase(),
+                cv.txtDireccion.getText().trim(),
+                cv.txtMedioContacto.getText().trim().toUpperCase(),
                 true
             );
 
@@ -46,22 +54,29 @@ public class ClienteControl {
                 JOptionPane.showMessageDialog(cv, "¡Cliente agregado correctamente!");
                 cv.actualizarVista(cm.read());
             } else {
-                JOptionPane.showMessageDialog(cv, "No se pudo agregar el cliente.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(cv, "No se pudo agregar el cliente. Verifica los datos y restricciones.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
         // Actualizar
         cv.btnActualizar.addActionListener(e -> {
             try {
-                int id = Integer.parseInt(cv.txtId.getText());
+                int id = Integer.parseInt(cv.txtId.getText().trim());
+                String nombre = cv.txtNombre.getText().trim();
+
+                if (nombreInvalido(nombre)) {
+                    JOptionPane.showMessageDialog(cv, "Ingresa un nombre válido.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
                 Cliente c = new Cliente(
                     id,
-                    cv.txtNombre.getText(),
-                    cv.txtTelefono.getText(),
-                    cv.txtCorreo.getText(),
-                    cv.txtRfc.getText(),
-                    cv.txtDireccion.getText(),
-                    cv.txtMedioContacto.getText(),
+                    nombre,
+                    cv.txtTelefono.getText().trim(),
+                    cv.txtCorreo.getText().trim(),
+                    cv.txtRfc.getText().trim().toUpperCase(),
+                    cv.txtDireccion.getText().trim(),
+                    cv.txtMedioContacto.getText().trim().toUpperCase(),
                     true
                 );
 
@@ -76,7 +91,7 @@ public class ClienteControl {
         // Eliminar
         cv.btnEliminar.addActionListener(e -> {
             try {
-                int id = Integer.parseInt(cv.txtId.getText());
+                int id = Integer.parseInt(cv.txtId.getText().trim());
                 Cliente c = new Cliente(id, "", "", "", "", "", "", true);
 
                 int resultado = cm.delete(c);
@@ -94,12 +109,24 @@ public class ClienteControl {
                 int fila = cv.tabla.getSelectedRow();
                 if (fila != -1) {
                     cv.txtId.setText(String.valueOf(cv.clienteModelo.getValueAt(fila, 0)));
-                    cv.txtNombre.setText((String) cv.clienteModelo.getValueAt(fila, 1));
-                    cv.txtTelefono.setText((String) cv.clienteModelo.getValueAt(fila, 2));
-                    cv.txtCorreo.setText((String) cv.clienteModelo.getValueAt(fila, 3));
-                    cv.txtRfc.setText((String) cv.clienteModelo.getValueAt(fila, 4));
-                    cv.txtDireccion.setText((String) cv.clienteModelo.getValueAt(fila, 5));
-                    cv.txtMedioContacto.setText((String) cv.clienteModelo.getValueAt(fila, 6));
+
+                    Object nombre = cv.clienteModelo.getValueAt(fila, 1);
+                    cv.txtNombre.setText(nombre != null ? String.valueOf(nombre) : "");
+
+                    Object telefono = cv.clienteModelo.getValueAt(fila, 2);
+                    cv.txtTelefono.setText(telefono != null ? String.valueOf(telefono) : "");
+
+                    Object correo = cv.clienteModelo.getValueAt(fila, 3);
+                    cv.txtCorreo.setText(correo != null ? String.valueOf(correo) : "");
+
+                    Object rfc = cv.clienteModelo.getValueAt(fila, 4);
+                    cv.txtRfc.setText(rfc != null ? String.valueOf(rfc) : "");
+
+                    Object direccion = cv.clienteModelo.getValueAt(fila, 5);
+                    cv.txtDireccion.setText(direccion != null ? String.valueOf(direccion) : "");
+
+                    Object medio = cv.clienteModelo.getValueAt(fila, 6);
+                    cv.txtMedioContacto.setText(medio != null ? String.valueOf(medio) : "");
                 }
             }
         });

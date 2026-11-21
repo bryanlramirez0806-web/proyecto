@@ -8,7 +8,7 @@ public class PolizaEntidad {
     protected int idCompania;
     protected int idUsuario;
     protected int idTipo;
-    protected Integer idPolizaAnterior; // Permite null
+    protected Integer idPolizaAnterior;
     protected String fechaEmision;
     protected String fechaInicio;
     protected String fechaVencimiento;
@@ -72,6 +72,9 @@ public class PolizaEntidad {
 
     @Override
     public String toString() {
-        return "Póliza N°: " + this.numeroPoliza;
+        String num = (this.numeroPoliza == null || this.numeroPoliza.trim().isEmpty())
+                ? "En trámite"
+                : this.numeroPoliza;
+        return "Póliza N°: " + num + " (#" + this.idPoliza + ")";
     }
 }

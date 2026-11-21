@@ -18,6 +18,15 @@ public class ClienteTM extends AbstractTableModel {
         return encabezados[cantidad];
     }
 
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+        switch (columnIndex) {
+            case 0: return Integer.class;
+            case 7: return Boolean.class;
+            default: return String.class;
+        }
+    }
+
     public void setColumnNames(String[] nuevosNombres) {
         if (nuevosNombres.length == encabezados.length) {
             this.encabezados = nuevosNombres;
@@ -43,7 +52,7 @@ public class ClienteTM extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        if (rowIndex > -1) {
+        if (rowIndex > -1 && rowIndex < clienteLista.size()) {
             Cliente c = clienteLista.get(rowIndex);
             switch (columnIndex) {
                 case 0: return c.getIdCliente();
@@ -80,6 +89,6 @@ public class ClienteTM extends AbstractTableModel {
     }
 
     public void llenar(List<Cliente> lista) {
-        this.clienteLista = lista;
+        this.clienteLista = (lista != null) ? lista : new ArrayList<>();
     }
 }

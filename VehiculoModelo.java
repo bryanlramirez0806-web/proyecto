@@ -12,6 +12,14 @@ public class VehiculoModelo extends Conexion implements DAO {
         super();
     }
 
+    private String limpiarTexto(String valor) {
+        if (valor == null) {
+            return null;
+        }
+        String limpio = valor.trim();
+        return limpio.isEmpty() ? null : limpio;
+    }
+
     @Override
     public List read() {
         List<Vehiculo> lista = new ArrayList<>();
@@ -44,13 +52,16 @@ public class VehiculoModelo extends Conexion implements DAO {
         try {
             this.conectar();
             Vehiculo v = (Vehiculo) obj;
-            ps = cnx.prepareStatement("INSERT INTO vehiculo (idCliente, idSubmarca, modelo, tipoVehiculo, numeroSerie, placas, activo) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            ps = cnx.prepareStatement(
+                "INSERT INTO vehiculo (idCliente, idSubmarca, modelo, tipoVehiculo, numeroSerie, placas, activo) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)"
+            );
             ps.setInt(1, v.getIdCliente());
             ps.setInt(2, v.getIdSubmarca());
-            ps.setString(3, v.getModelo());
-            ps.setString(4, v.getTipoVehiculo());
-            ps.setString(5, v.getNumeroSerie());
-            ps.setString(6, v.getPlacas());
+            ps.setString(3, limpiarTexto(v.getModelo()));
+            ps.setString(4, limpiarTexto(v.getTipoVehiculo()));
+            ps.setString(5, limpiarTexto(v.getNumeroSerie()));
+            ps.setString(6, limpiarTexto(v.getPlacas()));
             ps.setBoolean(7, true);
             return ps.executeUpdate();
         } catch (SQLException ex) {
@@ -66,13 +77,16 @@ public class VehiculoModelo extends Conexion implements DAO {
         try {
             this.conectar();
             Vehiculo v = (Vehiculo) obj;
-            ps = cnx.prepareStatement("UPDATE vehiculo SET idCliente = ?, idSubmarca = ?, modelo = ?, tipoVehiculo = ?, numeroSerie = ?, placas = ? WHERE idVehiculo = ?");
+            ps = cnx.prepareStatement(
+                "UPDATE vehiculo SET idCliente = ?, idSubmarca = ?, modelo = ?, tipoVehiculo = ?, numeroSerie = ?, placas = ? " +
+                "WHERE idVehiculo = ?"
+            );
             ps.setInt(1, v.getIdCliente());
             ps.setInt(2, v.getIdSubmarca());
-            ps.setString(3, v.getModelo());
-            ps.setString(4, v.getTipoVehiculo());
-            ps.setString(5, v.getNumeroSerie());
-            ps.setString(6, v.getPlacas());
+            ps.setString(3, limpiarTexto(v.getModelo()));
+            ps.setString(4, limpiarTexto(v.getTipoVehiculo()));
+            ps.setString(5, limpiarTexto(v.getNumeroSerie()));
+            ps.setString(6, limpiarTexto(v.getPlacas()));
             ps.setInt(7, v.getIdVehiculo());
             return ps.executeUpdate();
         } catch (SQLException ex) {

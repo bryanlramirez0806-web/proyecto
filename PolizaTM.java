@@ -6,7 +6,10 @@ import javax.swing.table.AbstractTableModel;
 
 public class PolizaTM extends AbstractTableModel {
     protected List<PolizaEntidad> polizaLista;
-    protected String[] encabezados = {"ID", "N° Póliza", "Cot.", "Veh.", "Comp.", "Usu.", "Tipo", "Ant.", "Emisión", "Inicio", "Vencimiento", "Prima Total", "Estatus"};
+    protected String[] encabezados = {
+        "ID", "N° Póliza", "Cot.", "Veh.", "Comp.", "Usu.", "Tipo", "Ant.",
+        "Emisión", "Inicio", "Vencimiento", "Prima Total", "Estatus"
+    };
 
     public PolizaTM() {
         polizaLista = new ArrayList<>();
@@ -43,7 +46,7 @@ public class PolizaTM extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        if (rowIndex > -1) {
+        if (rowIndex > -1 && rowIndex < polizaLista.size()) {
             PolizaEntidad p = polizaLista.get(rowIndex);
             switch (columnIndex) {
                 case 0: return p.getIdPoliza();
@@ -85,6 +88,6 @@ public class PolizaTM extends AbstractTableModel {
     }
 
     public void llenar(List<PolizaEntidad> lista) {
-        this.polizaLista = lista;
+        this.polizaLista = (lista != null) ? lista : new ArrayList<>();
     }
 }

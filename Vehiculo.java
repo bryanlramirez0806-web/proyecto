@@ -3,7 +3,7 @@ package polizas.Vehiculos;
 public class Vehiculo {
     protected int idVehiculo;
     protected int idCliente;
-    protected int idSubmarca; // Corregido a int idSubmarca
+    protected int idSubmarca;
     protected String modelo;
     protected String tipoVehiculo;
     protected String numeroSerie;
@@ -47,6 +47,9 @@ public class Vehiculo {
 
     @Override
     public String toString() {
-        return "Submarca ID: " + this.idSubmarca + " (" + this.placas + ")";
+        String placaTexto = (this.placas != null && !this.placas.trim().isEmpty())
+                ? this.placas.trim()
+                : "Sin placas";
+        return "Vehículo #" + this.idVehiculo + " (Submarca ID: " + this.idSubmarca + " - " + placaTexto + ")";
     }
 }

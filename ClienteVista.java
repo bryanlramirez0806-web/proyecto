@@ -1,6 +1,5 @@
 package polizas.Clientes;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.util.List;
 import javax.swing.JButton;
@@ -100,8 +99,10 @@ public class ClienteVista extends JPanel {
         clienteModelo.fireTableDataChanged();
 
         cmbClientes.removeAllItems();
-        for (Cliente c : lista) {
-            cmbClientes.addItem(c);
+        if (lista != null) {
+            for (Cliente c : lista) {
+                cmbClientes.addItem(c);
+            }
         }
     }
 }
