@@ -6,8 +6,10 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import polizas.Clientes.Cliente;
 import polizas.Clientes.ClienteModelo;
-import polizas.Submarcas.Submarca;
-import polizas.Submarcas.SubmarcaModelo;
+import polizas.Modelos.Modelo;
+import polizas.Modelos.ModeloModelo;
+import polizas.UsosVehiculo.UsoVehiculo;
+import polizas.UsosVehiculo.UsoVehiculoModelo;
 
 public class VehiculoControl {
     private VehiculoVista vv;
@@ -22,11 +24,12 @@ public class VehiculoControl {
         vv.actualizarVista(vm.read()); // Carga la lista al abrir la pantalla
     }
 
-    // Reutiliza los modelos de Clientes y Submarcas para llenar las listas
+    // Reutiliza los modelos de Clientes, Modelos y Usos para llenar las listas
     private void cargarCombos() {
         List<Cliente> clientes = new ClienteModelo().readActivos();
-        List<Submarca> submarcas = new SubmarcaModelo().read();
-        vv.llenarCombos(clientes, submarcas);
+        List<Modelo> modelos = new ModeloModelo().read();
+        List<UsoVehiculo> usos = new UsoVehiculoModelo().read();
+        vv.llenarCombos(clientes, modelos, usos);
     }
 
     /**
@@ -34,48 +37,50 @@ public class VehiculoControl {
      * Regresa el mensaje del problema, o null si todo está bien.
      */
     private String validar() {
-        if (vv.cmbCliente.getSelectedItem() == null) {
-            return "Escoge el cliente dueño del vehículo.";
-        }
-        if (vv.cmbSubmarca.getSelectedItem() == null) {
-            return "Escoge la submarca del vehículo.";
-        }
-        String modelo = vv.txtModelo.getText().trim();
+        if (vv.cmbCliente.getSelectedItem() == null) return "Escoge el cliente dueño del vehículo.";
+        if (vv.cmbModelo.getSelectedItem() == null) return "Escoge el modelo del vehículo.";
+        if (vv.cmbUso.getSelectedItem() == null) return "Escoge el uso del vehículo.";
+
+        String anio = vv.txtAnio.getText().trim();
         int anioMaximo = Year.now().getValue() + 1;
-        if (!modelo.matches("\\d{4}") || Integer.parseInt(modelo) < 1950 || Integer.parseInt(modelo) > anioMaximo) {
-            return "El modelo debe ser un año entre 1950 y " + anioMaximo + ".";
+        if (!anio.matches("\\d{4}") || Integer.parseInt(anio) < 1950 || Integer.parseInt(anio) > anioMaximo) {
+            return "El año debe estar entre 1950 y " + anioMaximo + ".";
         }
-        Object tipo = vv.cmbTipoVehiculo.getSelectedItem();
-        if (tipo == null || tipo.toString().trim().isEmpty()) {
-            return "Escribe el tipo de vehículo.";
+        // El número de serie (VIN) tiene 17 caracteres y no usa las letras I, O ni Q
+        if (!vv.txtNumSerie.getText().trim().toUpperCase().matches("[A-HJ-NPR-Z0-9]{17}")) {
+            return "El número de serie (VIN) debe tener 17 caracteres, sin las letras I, O ni Q.";
         }
-        if (vv.txtNumeroSerie.getText().trim().isEmpty()) {
-            return "Escribe el número de serie (VIN).";
-        }
-        if (vv.txtPlacas.getText().trim().isEmpty()) {
-            return "Escribe las placas.";
+        String placas = vv.txtPlacas.getText().trim();
+        if (placas.isEmpty() || placas.length() > 15) {
+            return "Escribe las placas (máximo 15 caracteres).";
         }
         return null;
     }
 
-    // Arma un objeto Vehiculo con lo que está en el formulario
+    // Arma un objeto Vehiculo con lo que está en el formulario (ya validado)
     private Vehiculo leerFormulario(int id) {
         Cliente cliente = (Cliente) vv.cmbCliente.getSelectedItem();
-        Submarca submarca = (Submarca) vv.cmbSubmarca.getSelectedItem();
+        Modelo modelo = (Modelo) vv.cmbModelo.getSelectedItem();
+        UsoVehiculo uso = (UsoVehiculo) vv.cmbUso.getSelectedItem();
         return new Vehiculo(
             id,
-            cliente.getIdCliente(),
-            submarca.getIdSubmarca(),
-            vv.txtModelo.getText().trim(),
-            vv.cmbTipoVehiculo.getSelectedItem().toString().trim(),
-            vv.txtNumeroSerie.getText().trim(),
+            Integer.parseInt(vv.txtAnio.getText().trim()),
+            vv.txtNumSerie.getText().trim(),
             vv.txtPlacas.getText().trim(),
+            vv.txtColor.getText().trim(),
+            cliente.getIdCliente(),
+            modelo.getIdModelo(),
+            uso.getIdUso(),
             vv.chkActivo.isSelected()
         );
     }
 
     private void mostrarError(String mensaje) {
         JOptionPane.showMessageDialog(vv, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    private void mostrarAviso(String mensaje) {
+        JOptionPane.showMessageDialog(vv, mensaje, "Advertencia", JOptionPane.WARNING_MESSAGE);
     }
 
     public void vehiculoEventos() {
@@ -89,7 +94,7 @@ public class VehiculoControl {
             }
         });
 
-        // Buscar por placas, VIN o cliente (RF-07)
+        // Buscar por placas, VIN, cliente o modelo (RF-07)
         vv.btnBuscar.addActionListener(e -> {
             String texto = vv.txtBuscar.getText().trim();
             lista = texto.isEmpty() ? vm.read() : vm.buscar(texto);
@@ -103,7 +108,7 @@ public class VehiculoControl {
         vv.btnAgregar.addActionListener(e -> {
             String problema = validar();
             if (problema != null) {
-                JOptionPane.showMessageDialog(vv, problema, "Advertencia", JOptionPane.WARNING_MESSAGE);
+                mostrarAviso(problema);
                 return;
             }
             if (vm.create(leerFormulario(0)) > 0) {
@@ -123,12 +128,12 @@ public class VehiculoControl {
             }
             String problema = validar();
             if (problema != null) {
-                JOptionPane.showMessageDialog(vv, problema, "Advertencia", JOptionPane.WARNING_MESSAGE);
+                mostrarAviso(problema);
                 return;
             }
             Vehiculo v = leerFormulario(Integer.parseInt(vv.txtIdVehiculo.getText()));
-            if (!v.isActivo() && vm.tienePendientes(v.getIdVehiculo())) {
-                mostrarError("No se puede desactivar: el vehículo tiene pólizas activas, en trámite o pagos pendientes.");
+            if (!v.isActivo() && vm.tienePolizasVigentes(v.getIdVehiculo())) {
+                mostrarError("No se puede desactivar: el vehículo tiene pólizas activas o en trámite.");
                 return;
             }
             if (vm.update(v) > 0) {
@@ -147,20 +152,18 @@ public class VehiculoControl {
             }
             int id = Integer.parseInt(vv.txtIdVehiculo.getText());
 
-            // RN-14: no se da de baja si tiene pólizas activas, en trámite o pagos pendientes
-            if (vm.tienePendientes(id)) {
-                mostrarError("No se puede dar de baja: el vehículo tiene pólizas activas, en trámite o pagos pendientes.");
+            // RN-14: no se da de baja si tiene pólizas activas o en trámite
+            if (vm.tienePolizasVigentes(id)) {
+                mostrarError("No se puede dar de baja: el vehículo tiene pólizas activas o en trámite.");
                 return;
             }
-
             int respuesta = JOptionPane.showConfirmDialog(vv,
                 "¿Dar de baja el vehículo con placas " + vv.txtPlacas.getText() + "?\nQuedará inactivo, pero su historial se guarda.",
                 "Confirmar baja", JOptionPane.YES_NO_OPTION);
             if (respuesta != JOptionPane.YES_OPTION) {
                 return;
             }
-
-            Vehiculo v = new Vehiculo(id, 0, 0, "", "", "", "", false);
+            Vehiculo v = new Vehiculo(id, 0, "", "", "", 0, 0, 0, false);
             if (vm.delete(v) > 0) {
                 JOptionPane.showMessageDialog(vv, "Vehículo dado de baja correctamente.");
                 vv.limpiarCampos();
@@ -181,12 +184,11 @@ public class VehiculoControl {
                 if (fila != -1) {
                     Vehiculo v = vv.vehiculoModelo.getVehiculo(fila);
                     vv.txtIdVehiculo.setText(String.valueOf(v.getIdVehiculo()));
-                    vv.seleccionarCliente(v.getIdCliente());
-                    vv.seleccionarSubmarca(v.getIdSubmarca());
-                    vv.txtModelo.setText(v.getModelo());
-                    vv.cmbTipoVehiculo.setSelectedItem(v.getTipoVehiculo());
-                    vv.txtNumeroSerie.setText(v.getNumeroSerie());
+                    vv.seleccionar(v.getIdCliente(), v.getIdModelo(), v.getIdUso());
+                    vv.txtAnio.setText(String.valueOf(v.getAnio()));
+                    vv.txtNumSerie.setText(v.getNumSerie());
                     vv.txtPlacas.setText(v.getPlacas());
+                    vv.txtColor.setText(v.getColor() == null ? "" : v.getColor());
                     vv.chkActivo.setSelected(v.isActivo());
                 }
             }

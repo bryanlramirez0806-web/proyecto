@@ -8,13 +8,15 @@ import polizas.General.DAO;
 
 public class VehiculoModelo extends Conexion implements DAO {
 
-    // Consulta base: une vehículo con su cliente, submarca y marca para mostrar los nombres
+    // Consulta base: une vehículo con su cliente, modelo, marca y uso para mostrar los nombres
     private static final String SELECT_BASE =
-        "SELECT v.*, c.nombre AS nombreCliente, CONCAT(m.nombre, ' ', s.nombre) AS nombreSubmarca "
+        "SELECT v.*, CONCAT_WS(' ', c.nombre, c.apellidoPaterno, c.apellidoMaterno) AS nombreCliente, "
+        + "CONCAT(ma.nombre, ' ', mo.nombre) AS nombreModelo, u.nombre AS nombreUso "
         + "FROM vehiculo v "
         + "JOIN cliente c ON v.idCliente = c.idCliente "
-        + "JOIN submarca s ON v.idSubmarca = s.idSubmarca "
-        + "JOIN marca m ON s.idMarca = m.idMarca ";
+        + "JOIN modelo mo ON v.idModelo = mo.idModelo "
+        + "JOIN marca ma ON mo.idMarca = ma.idMarca "
+        + "JOIN usovehiculo u ON v.idUso = u.idUso ";
 
     public VehiculoModelo() {
         super();
@@ -24,79 +26,81 @@ public class VehiculoModelo extends Conexion implements DAO {
     private Vehiculo leerVehiculo() throws SQLException {
         Vehiculo v = new Vehiculo(
             rs.getInt("idVehiculo"),
-            rs.getInt("idCliente"),
-            rs.getInt("idSubmarca"),
-            rs.getString("modelo"),
-            rs.getString("tipoVehiculo"),
-            rs.getString("numeroSerie"),
+            rs.getInt("anio"),
+            rs.getString("numSerie"),
             rs.getString("placas"),
+            rs.getString("color"),
+            rs.getInt("idCliente"),
+            rs.getInt("idModelo"),
+            rs.getInt("idUso"),
             rs.getBoolean("activo")
         );
         v.setNombreCliente(rs.getString("nombreCliente"));
-        v.setNombreSubmarca(rs.getString("nombreSubmarca"));
+        v.setNombreModelo(rs.getString("nombreModelo"));
+        v.setNombreUso(rs.getString("nombreUso"));
         return v;
+    }
+
+    // Ejecuta un SELECT ya preparado y regresa la lista de vehículos
+    private List<Vehiculo> llenarLista() throws SQLException {
+        List<Vehiculo> lista = new ArrayList<>();
+        rs = ps.executeQuery();
+        while (rs.next()) {
+            lista.add(leerVehiculo());
+        }
+        return lista;
     }
 
     @Override
     public List read() {
-        List<Vehiculo> lista = new ArrayList<>();
         try {
             this.conectar();
-            if (cnx == null) return lista;
+            if (cnx == null) return new ArrayList<>();
             ps = cnx.prepareStatement(SELECT_BASE + "ORDER BY v.idVehiculo");
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                lista.add(leerVehiculo());
-            }
+            return llenarLista();
         } catch (SQLException ex) {
             guardarError(ex);
+            return new ArrayList<>();
         } finally {
             this.close();
         }
-        return lista;
     }
 
     // Solo los vehículos activos (para escogerlos en Pólizas)
     public List<Vehiculo> readActivos() {
-        List<Vehiculo> lista = new ArrayList<>();
         try {
             this.conectar();
-            if (cnx == null) return lista;
+            if (cnx == null) return new ArrayList<>();
             ps = cnx.prepareStatement(SELECT_BASE + "WHERE v.activo = TRUE ORDER BY v.placas");
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                lista.add(leerVehiculo());
-            }
+            return llenarLista();
         } catch (SQLException ex) {
             guardarError(ex);
+            return new ArrayList<>();
         } finally {
             this.close();
         }
-        return lista;
     }
 
-    // RF-07: buscar por placas, número de serie (VIN) o nombre del cliente
+    // RF-07: buscar por placas, número de serie (VIN), nombre del cliente o modelo
     public List<Vehiculo> buscar(String texto) {
-        List<Vehiculo> lista = new ArrayList<>();
         try {
             this.conectar();
-            if (cnx == null) return lista;
+            if (cnx == null) return new ArrayList<>();
             ps = cnx.prepareStatement(SELECT_BASE
-                + "WHERE v.placas LIKE ? OR v.numeroSerie LIKE ? OR c.nombre LIKE ? ORDER BY v.idVehiculo");
+                + "WHERE v.placas LIKE ? OR v.numSerie LIKE ? "
+                + "OR CONCAT_WS(' ', c.nombre, c.apellidoPaterno, c.apellidoMaterno) LIKE ? "
+                + "OR CONCAT(ma.nombre, ' ', mo.nombre) LIKE ? ORDER BY v.idVehiculo");
             String patron = "%" + texto.trim() + "%";
-            ps.setString(1, patron);
-            ps.setString(2, patron);
-            ps.setString(3, patron);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                lista.add(leerVehiculo());
+            for (int i = 1; i <= 4; i++) {
+                ps.setString(i, patron);
             }
+            return llenarLista();
         } catch (SQLException ex) {
             guardarError(ex);
+            return new ArrayList<>();
         } finally {
             this.close();
         }
-        return lista;
     }
 
     @Override
@@ -105,14 +109,14 @@ public class VehiculoModelo extends Conexion implements DAO {
             this.conectar();
             if (cnx == null) return 0;
             Vehiculo v = (Vehiculo) obj;
-            ps = cnx.prepareStatement("INSERT INTO vehiculo (idCliente, idSubmarca, modelo, tipoVehiculo, numeroSerie, placas, activo) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            ps.setInt(1, v.getIdCliente());
-            ps.setInt(2, v.getIdSubmarca());
-            ps.setString(3, v.getModelo());
-            ps.setString(4, v.getTipoVehiculo());
-            ps.setString(5, v.getNumeroSerie().toUpperCase());
-            ps.setString(6, v.getPlacas().toUpperCase());
-            ps.setBoolean(7, true);
+            ps = cnx.prepareStatement("INSERT INTO vehiculo (anio, numSerie, placas, color, idCliente, idModelo, idUso, activo) VALUES (?, ?, ?, ?, ?, ?, ?, TRUE)");
+            ps.setInt(1, v.getAnio());
+            ps.setString(2, v.getNumSerie().toUpperCase());
+            ps.setString(3, v.getPlacas().toUpperCase());
+            ps.setString(4, nulo(v.getColor()));
+            ps.setInt(5, v.getIdCliente());
+            ps.setInt(6, v.getIdModelo());
+            ps.setInt(7, v.getIdUso());
             return ps.executeUpdate();
         } catch (SQLException ex) {
             guardarError(ex);
@@ -128,15 +132,16 @@ public class VehiculoModelo extends Conexion implements DAO {
             this.conectar();
             if (cnx == null) return 0;
             Vehiculo v = (Vehiculo) obj;
-            ps = cnx.prepareStatement("UPDATE vehiculo SET idCliente = ?, idSubmarca = ?, modelo = ?, tipoVehiculo = ?, numeroSerie = ?, placas = ?, activo = ? WHERE idVehiculo = ?");
-            ps.setInt(1, v.getIdCliente());
-            ps.setInt(2, v.getIdSubmarca());
-            ps.setString(3, v.getModelo());
-            ps.setString(4, v.getTipoVehiculo());
-            ps.setString(5, v.getNumeroSerie().toUpperCase());
-            ps.setString(6, v.getPlacas().toUpperCase());
-            ps.setBoolean(7, v.isActivo());
-            ps.setInt(8, v.getIdVehiculo());
+            ps = cnx.prepareStatement("UPDATE vehiculo SET anio = ?, numSerie = ?, placas = ?, color = ?, idCliente = ?, idModelo = ?, idUso = ?, activo = ? WHERE idVehiculo = ?");
+            ps.setInt(1, v.getAnio());
+            ps.setString(2, v.getNumSerie().toUpperCase());
+            ps.setString(3, v.getPlacas().toUpperCase());
+            ps.setString(4, nulo(v.getColor()));
+            ps.setInt(5, v.getIdCliente());
+            ps.setInt(6, v.getIdModelo());
+            ps.setInt(7, v.getIdUso());
+            ps.setBoolean(8, v.isActivo());
+            ps.setInt(9, v.getIdVehiculo());
             return ps.executeUpdate();
         } catch (SQLException ex) {
             guardarError(ex);
@@ -147,16 +152,14 @@ public class VehiculoModelo extends Conexion implements DAO {
     }
 
     /**
-     * RN-14: no se puede dar de baja un vehículo con pólizas activas o en trámite,
-     * o con pagos pendientes. Regresa true si tiene alguno.
+     * RN-14: no se puede dar de baja un vehículo con pólizas activas o en trámite.
+     * Regresa true si tiene alguna.
      */
-    public boolean tienePendientes(int idVehiculo) {
+    public boolean tienePolizasVigentes(int idVehiculo) {
         try {
             this.conectar();
             if (cnx == null) return true;
-            ps = cnx.prepareStatement(
-                "SELECT COUNT(*) FROM poliza p WHERE p.idVehiculo = ? AND (p.estatus IN ('ACTIVA', 'EN_TRAMITE') "
-                + "OR EXISTS (SELECT 1 FROM pago g WHERE g.idPoliza = p.idPoliza AND g.estatus = 'PENDIENTE'))");
+            ps = cnx.prepareStatement("SELECT COUNT(*) FROM poliza WHERE idVehiculo = ? AND estado IN ('ACTIVA', 'EN_TRAMITE')");
             ps.setInt(1, idVehiculo);
             rs = ps.executeQuery();
             rs.next();
