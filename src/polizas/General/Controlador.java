@@ -5,27 +5,28 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import polizas.Aseguradoras.AseguradoraControl;
+import polizas.Aseguradoras.AseguradoraVista;
 import polizas.Clientes.ClienteControl;
 import polizas.Clientes.ClienteVista;
-import polizas.Companias.CompaniaControl;
-import polizas.Companias.CompaniaVista;
-import polizas.Cotizaciones.CotizacionControl;
-import polizas.Cotizaciones.CotizacionVista;
-import polizas.Marcas.MarcasControl;
-import polizas.Marcas.MarcasVista;
+import polizas.Coberturas.CoberturaControl;
+import polizas.Coberturas.CoberturaVista;
+import polizas.FormasPago.FormaPagoControl;
+import polizas.FormasPago.FormaPagoVista;
+import polizas.Marcas.MarcaControl;
+import polizas.Marcas.MarcaVista;
+import polizas.Modelos.ModeloControl;
+import polizas.Modelos.ModeloVista;
 import polizas.Polizas.PolizaControl;
 import polizas.Polizas.PolizaVista;
-import polizas.TiposPoliza.TipoPolizaControl;
-import polizas.TiposPoliza.TipoPolizaVista;
-import polizas.Usuarios.UsuarioControl;
-import polizas.Usuarios.UsuarioVista;
+import polizas.UsosVehiculo.UsoVehiculoControl;
+import polizas.UsosVehiculo.UsoVehiculoVista;
 import polizas.Vehiculos.VehiculoControl;
 import polizas.Vehiculos.VehiculoVista;
 
 public class Controlador {
 
     protected Bienvenida vista;
-    protected MarcasVista marcasVista;
     private final Map<String, JPanel> panelesActivos = new HashMap<>();
 
     public Controlador(Bienvenida vista) {
@@ -33,6 +34,7 @@ public class Controlador {
         this.eventos();
     }
 
+    // Cambia el panel del centro por el del módulo que se abrió
     private void mostrarPanel(JPanel nuevoPanel, String key) {
         JPanel anterior = panelesActivos.get(key);
         if (anterior != null) {
@@ -46,102 +48,72 @@ public class Controlador {
     }
 
     void eventos() {
-        vista.mensaje.addActionListener(
-            e -> vista.cl.show(vista.pc, "mensaje")
-        );
+        vista.mensaje.addActionListener(e -> vista.cl.show(vista.pc, "mensaje"));
 
         vista.home.addActionListener(e -> {
             JPanel panelHome = new JPanel(null);
             panelHome.setBackground(new Color(40, 40, 40));
-            JLabel lblHome = new JLabel("Bienvenido al Gestor de Pólizas. Abre los módulos desde el menú Base de Datos.");
+            JLabel lblHome = new JLabel("Bienvenido al Gestor de Pólizas. Abre los módulos desde el menú Módulos o Catálogos.");
             lblHome.setForeground(Color.WHITE);
-            lblHome.setBounds(250, 20, 600, 30);
+            lblHome.setBounds(250, 20, 650, 30);
             panelHome.add(lblHome);
             mostrarPanel(panelHome, "home");
         });
 
-        vista.marcas.addActionListener(e -> {
-            marcasVista = new MarcasVista();
-            new MarcasControl(marcasVista);
-            mostrarPanel(marcasVista, "mk");
-        });
-
+        // ---------- Módulos principales ----------
         vista.mClientes.addActionListener(e -> {
-            ClienteVista clienteVista = new ClienteVista();
-            new ClienteControl(clienteVista);
-            mostrarPanel(clienteVista, "clientesKey");
+            ClienteVista v = new ClienteVista();
+            new ClienteControl(v);
+            mostrarPanel(v, "clientes");
         });
 
         vista.mVehiculos.addActionListener(e -> {
-            VehiculoVista vehiculoVista = new VehiculoVista();
-            new VehiculoControl(vehiculoVista);
-            mostrarPanel(vehiculoVista, "vehiculosKey");
+            VehiculoVista v = new VehiculoVista();
+            new VehiculoControl(v);
+            mostrarPanel(v, "vehiculos");
         });
 
-        vista.mCompanias.addActionListener(e -> {
-            CompaniaVista companiasVista = new CompaniaVista();
-            new CompaniaControl(companiasVista);
-            mostrarPanel(companiasVista, "companiasKey");
+        vista.mPolizas.addActionListener(e -> {
+            PolizaVista v = new PolizaVista();
+            new PolizaControl(v);
+            mostrarPanel(v, "polizas");
         });
 
-        vista.mTipoPoliza.addActionListener(e -> {
-            TipoPolizaVista tpVista = new TipoPolizaVista();
-            new TipoPolizaControl(tpVista);
-            mostrarPanel(tpVista, "tipoPolizaKey");
+        // ---------- Catálogos ----------
+        vista.mMarcas.addActionListener(e -> {
+            MarcaVista v = new MarcaVista();
+            new MarcaControl(v);
+            mostrarPanel(v, "marcas");
         });
 
-        vista.mUsuarios.addActionListener(e -> {
-            UsuarioVista uVista = new UsuarioVista();
-            new UsuarioControl(uVista);
-            mostrarPanel(uVista, "usuariosKey");
+        vista.mModelos.addActionListener(e -> {
+            ModeloVista v = new ModeloVista();
+            new ModeloControl(v);
+            mostrarPanel(v, "modelos");
         });
 
-        vista.mCotizaciones.addActionListener(e -> {
-            CotizacionVista cVista = new CotizacionVista();
-            new CotizacionControl(cVista);
-            mostrarPanel(cVista, "cotizacionesKey");
+        vista.mUsos.addActionListener(e -> {
+            UsoVehiculoVista v = new UsoVehiculoVista();
+            new UsoVehiculoControl(v);
+            mostrarPanel(v, "usos");
         });
 
-        vista.mPolizasSistema.addActionListener(e -> {
-            PolizaVista pVista = new PolizaVista();
-            new PolizaControl(pVista);
-            mostrarPanel(pVista, "polizasKey");
+        vista.mAseguradoras.addActionListener(e -> {
+            AseguradoraVista v = new AseguradoraVista();
+            new AseguradoraControl(v);
+            mostrarPanel(v, "aseguradoras");
+        });
+
+        vista.mFormasPago.addActionListener(e -> {
+            FormaPagoVista v = new FormaPagoVista();
+            new FormaPagoControl(v);
+            mostrarPanel(v, "formasPago");
         });
 
         vista.mCoberturas.addActionListener(e -> {
-            var v = new polizas.Coberturas.CoberturaVista();
-            new polizas.Coberturas.CoberturaControl(v);
-            mostrarPanel(v, "cobKey");
-        });
-
-        vista.mDetalleCob.addActionListener(e -> {
-            var v = new polizas.DetalleCobertura.DetalleCoberturaVista();
-            new polizas.DetalleCobertura.DetalleCoberturaControl(v);
-            mostrarPanel(v, "detCobKey");
-        });
-
-        vista.mPagos.addActionListener(e -> {
-            var v = new polizas.Pagos.PagoVista();
-            new polizas.Pagos.PagoControl(v);
-            mostrarPanel(v, "pagoKey");
-        });
-
-        vista.mCancelaciones.addActionListener(e -> {
-            var v = new polizas.Cancelaciones.CancelacionVista();
-            new polizas.Cancelaciones.CancelacionControl(v);
-            mostrarPanel(v, "cancKey");
-        });
-
-        vista.mNotificaciones.addActionListener(e -> {
-            var v = new polizas.Notificaciones.NotificacionVista();
-            new polizas.Notificaciones.NotificacionControl(v);
-            mostrarPanel(v, "notifKey");
-        });
-
-        vista.mDocumentos.addActionListener(e -> {
-            var v = new polizas.Documentos.DocumentoVista();
-            new polizas.Documentos.DocumentoControl(v);
-            mostrarPanel(v, "docKey");
+            CoberturaVista v = new CoberturaVista();
+            new CoberturaControl(v);
+            mostrarPanel(v, "coberturas");
         });
     }
 }

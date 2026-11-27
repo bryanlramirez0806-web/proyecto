@@ -15,12 +15,10 @@ import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 
 public class Bienvenida extends JFrame {
     protected JMenuBar mb;
-    protected JMenu mA, mBD;
-    protected JMenuItem mCancelaciones, mNotificaciones, mDocumentos;
-    protected JMenuItem mCoberturas, mDetalleCob, mPagos;
-    protected JMenuItem mClientes, mVehiculos, mCompanias, mPolizasSistema;
-    protected JMenuItem home, mTipoPoliza, mUsuarios, mCotizaciones;
-    protected JMenuItem mensaje, marcas, mSubmarcas;
+    protected JMenu mA, mModulos, mCatalogos;
+    protected JMenuItem home, mensaje;
+    protected JMenuItem mClientes, mVehiculos, mPolizas;
+    protected JMenuItem mMarcas, mModelos, mUsos, mAseguradoras, mFormasPago, mCoberturas;
     protected CardLayout cl;
     protected JPanel pi, ps, pd, pc;
 
@@ -51,7 +49,7 @@ public class Bienvenida extends JFrame {
         pc = new JPanel(cl);
         pc.setBackground(new Color(40, 40, 40));
 
-        JLabel lblWelcome = new JLabel("Bienvenido al Gestor de Pólizas. Abre los módulos desde el menú Base de Datos.", javax.swing.SwingConstants.CENTER);
+        JLabel lblWelcome = new JLabel("Bienvenido al Gestor de Pólizas. Abre los módulos desde el menú Módulos o Catálogos.", javax.swing.SwingConstants.CENTER);
         lblWelcome.setForeground(Color.white);
         pc.add(lblWelcome, "home");
         pc.add(new Mensaje(), "mensaje");
@@ -83,40 +81,33 @@ public class Bienvenida extends JFrame {
         mensaje = new JMenuItem("Mensaje");
         this.mA.add(mensaje);
 
-        this.mBD = new JMenu("Base de Datos");
-        marcas = new JMenuItem("Marcas");
-        mSubmarcas = new JMenuItem("Submarcas");
+        // Los tres módulos principales del sistema
+        this.mModulos = new JMenu("Módulos");
         mClientes = new JMenuItem("Clientes");
         mVehiculos = new JMenuItem("Vehículos");
-        mCompanias = new JMenuItem("Compañías de Seguros");
-        mTipoPoliza = new JMenuItem("Tipos de Póliza");
-        mUsuarios = new JMenuItem("Usuarios");
-        mCotizaciones = new JMenuItem("Cotizaciones");
-        mPolizasSistema = new JMenuItem("Pólizas");
-        mCoberturas = new JMenuItem("Coberturas");
-        mDetalleCob = new JMenuItem("Detalle Coberturas");
-        mPagos = new JMenuItem("Pagos");
-        mCancelaciones = new JMenuItem("Cancelaciones");
-        mNotificaciones = new JMenuItem("Notificaciones");
-        mDocumentos = new JMenuItem("Documentos");
+        mPolizas = new JMenuItem("Pólizas");
+        mModulos.add(mClientes);
+        mModulos.add(mVehiculos);
+        mModulos.add(mPolizas);
 
-        mBD.add(mCancelaciones);
-        mBD.add(mNotificaciones);
-        mBD.add(mDocumentos);
-        mBD.add(mCoberturas);
-        mBD.add(mDetalleCob);
-        mBD.add(mPagos);
-        mBD.add(mPolizasSistema);
-        mBD.add(mCotizaciones);
-        mBD.add(mUsuarios);
-        mBD.add(mTipoPoliza);
-        mBD.add(mCompanias);
-        mBD.add(marcas);
-        mBD.add(mSubmarcas);
-        mBD.add(mClientes);
-        mBD.add(mVehiculos);
+        // Catálogos que usan los módulos principales
+        this.mCatalogos = new JMenu("Catálogos");
+        mMarcas = new JMenuItem("Marcas");
+        mModelos = new JMenuItem("Modelos");
+        mUsos = new JMenuItem("Usos de vehículo");
+        mAseguradoras = new JMenuItem("Aseguradoras");
+        mFormasPago = new JMenuItem("Formas de pago");
+        mCoberturas = new JMenuItem("Coberturas");
+        mCatalogos.add(mMarcas);
+        mCatalogos.add(mModelos);
+        mCatalogos.add(mUsos);
+        mCatalogos.addSeparator();
+        mCatalogos.add(mAseguradoras);
+        mCatalogos.add(mFormasPago);
+        mCatalogos.add(mCoberturas);
 
         this.mb.add(mA);
-        this.mb.add(mBD);
+        this.mb.add(mModulos);
+        this.mb.add(mCatalogos);
     }
 }

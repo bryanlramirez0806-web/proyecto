@@ -1,0 +1,139 @@
+package polizas.UsosVehiculo;
+
+import java.awt.event.MouseAdapter;
+import java.util.List;
+import javax.swing.JOptionPane;
+
+public class UsoVehiculoControl {
+    private UsoVehiculoVista vista;
+    private UsoVehiculoModelo modelo;
+    private List<UsoVehiculo> lista;
+
+    public UsoVehiculoControl(UsoVehiculoVista vista) {
+        this.vista = vista;
+        this.modelo = new UsoVehiculoModelo();
+        eventos();
+        vista.actualizarVista(modelo.read()); // Carga la lista al abrir la pantalla
+    }
+
+    /**
+     * Revisa los datos antes de guardarlos.
+     * Regresa el mensaje del problema, o null si todo está bien.
+     */
+    private String validar() {
+        String nombre = vista.txtNombre.getText().trim();
+        if (nombre.isEmpty()) {
+            return "Escribe el nombre.";
+        }
+        if (nombre.length() > 50) {
+            return "Nombre no puede tener más de 50 caracteres.";
+        }
+        return null;
+    }
+
+    // Arma un objeto UsoVehiculo con lo que está en el formulario (ya validado)
+    private UsoVehiculo leerFormulario(int id) {
+        return new UsoVehiculo(id, vista.txtNombre.getText().trim());
+    }
+
+    private void mostrarError(String mensaje) {
+        JOptionPane.showMessageDialog(vista, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    private void mostrarAviso(String mensaje) {
+        JOptionPane.showMessageDialog(vista, mensaje, "Advertencia", JOptionPane.WARNING_MESSAGE);
+    }
+
+    private void eventos() {
+        // Consultar
+        vista.btnConsultar.addActionListener(e -> {
+            lista = modelo.read();
+            vista.actualizarVista(lista);
+            if (!modelo.getMensajeError().isEmpty()) {
+                mostrarError(modelo.getMensajeError());
+            }
+        });
+
+        // Buscar
+        vista.btnBuscar.addActionListener(e -> {
+            String texto = vista.txtBuscar.getText().trim();
+            lista = texto.isEmpty() ? modelo.read() : modelo.buscar(texto);
+            vista.actualizarVista(lista);
+            if (lista.isEmpty()) {
+                JOptionPane.showMessageDialog(vista, "No se encontraron usos de vehículo con \"" + texto + "\".");
+            }
+        });
+
+        // Agregar
+        vista.btnAgregar.addActionListener(e -> {
+            String problema = validar();
+            if (problema != null) {
+                mostrarAviso(problema);
+                return;
+            }
+            if (modelo.create(leerFormulario(0)) > 0) {
+                JOptionPane.showMessageDialog(vista, "¡Uso de vehículo agregado correctamente!");
+                vista.limpiarCampos();
+                vista.actualizarVista(modelo.read());
+            } else {
+                mostrarError("No se pudo agregar el uso de vehículo.\n" + modelo.getMensajeError());
+            }
+        });
+
+        // Actualizar
+        vista.btnActualizar.addActionListener(e -> {
+            if (vista.txtId.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(vista, "Selecciona un registro de la tabla.");
+                return;
+            }
+            String problema = validar();
+            if (problema != null) {
+                mostrarAviso(problema);
+                return;
+            }
+            if (modelo.update(leerFormulario(Integer.parseInt(vista.txtId.getText()))) > 0) {
+                JOptionPane.showMessageDialog(vista, "Uso de vehículo actualizado correctamente.");
+                vista.actualizarVista(modelo.read());
+            } else {
+                mostrarError("No se pudo actualizar.\n" + modelo.getMensajeError());
+            }
+        });
+
+        // Eliminar (la base de datos no deja borrar si el registro se está usando)
+        vista.btnEliminar.addActionListener(e -> {
+            if (vista.txtId.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(vista, "Selecciona un registro de la tabla.");
+                return;
+            }
+            int respuesta = JOptionPane.showConfirmDialog(vista,
+                "¿Eliminar el uso de vehículo \"" + vista.txtNombre.getText() + "\"?", "Confirmar", JOptionPane.YES_NO_OPTION);
+            if (respuesta != JOptionPane.YES_OPTION) {
+                return;
+            }
+            UsoVehiculo x = new UsoVehiculo(Integer.parseInt(vista.txtId.getText()), "");
+            if (modelo.delete(x) > 0) {
+                JOptionPane.showMessageDialog(vista, "Uso de vehículo eliminado correctamente.");
+                vista.limpiarCampos();
+                vista.actualizarVista(modelo.read());
+            } else {
+                mostrarError("No se pudo eliminar.\n" + modelo.getMensajeError());
+            }
+        });
+
+        // Limpiar
+        vista.btnLimpiar.addActionListener(e -> vista.limpiarCampos());
+
+        // Clic en la tabla para rellenar campos
+        vista.tabla.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                int fila = vista.tabla.getSelectedRow();
+                if (fila != -1) {
+                    UsoVehiculo x = vista.tablaModelo.getUsoVehiculo(fila);
+                    vista.txtId.setText(String.valueOf(x.getIdUso()));
+                    vista.txtNombre.setText(x.getNombre() == null ? "" : x.getNombre());
+                }
+            }
+        });
+    }
+}

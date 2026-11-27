@@ -1,29 +1,37 @@
 package polizas.General;
 
 /**
- * Clase abstracta con los datos de contacto que comparten Cliente y Usuario
- * (diagrama de clases de la Fase 2). No se puede crear un objeto Persona
- * directamente; solo sirve para que las otras clases hereden sus datos.
+ * Clase abstracta con el nombre y los apellidos que comparten Cliente y
+ * Usuario en el diagrama. No se puede crear un objeto Persona directamente;
+ * solo sirve para que otras clases hereden sus datos.
  */
 public abstract class Persona {
     protected String nombre;
-    protected String telefono;
-    protected String correo;
+    protected String apellidoPaterno;
+    protected String apellidoMaterno;
 
-    public Persona(String nombre, String telefono, String correo) {
+    public Persona(String nombre, String apellidoPaterno, String apellidoMaterno) {
         this.nombre = nombre;
-        this.telefono = telefono;
-        this.correo = correo;
+        this.apellidoPaterno = apellidoPaterno;
+        this.apellidoMaterno = apellidoMaterno;
     }
 
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
 
-    public String getTelefono() { return telefono; }
-    public void setTelefono(String telefono) { this.telefono = telefono; }
+    public String getApellidoPaterno() { return apellidoPaterno; }
+    public void setApellidoPaterno(String apellidoPaterno) { this.apellidoPaterno = apellidoPaterno; }
 
-    public String getCorreo() { return correo; }
-    public void setCorreo(String correo) { this.correo = correo; }
+    public String getApellidoMaterno() { return apellidoMaterno; }
+    public void setApellidoMaterno(String apellidoMaterno) { this.apellidoMaterno = apellidoMaterno; }
+
+    // Junta nombre y apellidos, saltando los que estén vacíos
+    public String getNombreCompleto() {
+        String completo = nombre;
+        if (apellidoPaterno != null && !apellidoPaterno.isEmpty()) completo += " " + apellidoPaterno;
+        if (apellidoMaterno != null && !apellidoMaterno.isEmpty()) completo += " " + apellidoMaterno;
+        return completo;
+    }
 
     // Cada clase hija decide cómo se muestra (por ejemplo en un JComboBox)
     @Override
