@@ -8,14 +8,15 @@ import polizas.General.DAO;
 
 public class PolizaModelo extends Conexion implements DAO {
 
-    // Consulta base: une la póliza con su vehículo, cliente, compañía y tipo para mostrar los nombres
+    // Consulta base: une la póliza con su vehículo, cliente, aseguradora y forma de pago para mostrar los nombres
     private static final String SELECT_BASE =
-        "SELECT p.*, v.placas, c.nombre AS nombreCliente, cs.nombre AS nombreCompania, t.nombre AS nombreTipo "
+        "SELECT p.*, v.placas, CONCAT_WS(' ', c.nombre, c.apellidoPaterno, c.apellidoMaterno) AS nombreCliente, "
+        + "a.nombre AS nombreAseguradora, f.nombre AS nombreFormaPago "
         + "FROM poliza p "
         + "JOIN vehiculo v ON p.idVehiculo = v.idVehiculo "
         + "JOIN cliente c ON v.idCliente = c.idCliente "
-        + "JOIN companiaseguros cs ON p.idCompania = cs.idCompania "
-        + "JOIN tipopoliza t ON p.idTipo = t.idTipo ";
+        + "JOIN aseguradora a ON p.idAseguradora = a.idAseguradora "
+        + "JOIN formapago f ON p.idFormaPago = f.idFormaPago ";
 
     public PolizaModelo() {
         super();
@@ -26,34 +27,41 @@ public class PolizaModelo extends Conexion implements DAO {
         PolizaEntidad p = new PolizaEntidad(
             rs.getInt("idPoliza"),
             rs.getString("numeroPoliza"),
-            rs.getInt("idCotizacion"),
-            rs.getInt("idVehiculo"),
-            rs.getInt("idCompania"),
-            rs.getInt("idUsuario"),
-            rs.getInt("idTipo"),
-            rs.getObject("idPolizaAnterior") != null ? rs.getInt("idPolizaAnterior") : null,
-            rs.getString("fechaEmision"),
             rs.getString("fechaInicio"),
-            rs.getString("fechaVencimiento"),
+            rs.getString("fechaFin"),
             rs.getDouble("primaTotal"),
-            rs.getString("estatus")
+            rs.getString("estado"),
+            rs.getInt("idVehiculo"),
+            rs.getInt("idAseguradora"),
+            rs.getInt("idFormaPago"),
+            rs.getObject("idPolizaAnterior") != null ? rs.getInt("idPolizaAnterior") : null
         );
         p.setPlacas(rs.getString("placas"));
         p.setNombreCliente(rs.getString("nombreCliente"));
-        p.setNombreCompania(rs.getString("nombreCompania"));
-        p.setNombreTipo(rs.getString("nombreTipo"));
+        p.setNombreAseguradora(rs.getString("nombreAseguradora"));
+        p.setNombreFormaPago(rs.getString("nombreFormaPago"));
         return p;
     }
 
+    // Ejecuta un SELECT ya preparado y regresa la lista de pólizas
+    private List<PolizaEntidad> llenarLista() throws SQLException {
+        List<PolizaEntidad> lista = new ArrayList<>();
+        rs = ps.executeQuery();
+        while (rs.next()) {
+            lista.add(leerPoliza());
+        }
+        return lista;
+    }
+
     /**
-     * RF-29 / RN-9: toda póliza activa cuya fecha de vencimiento ya pasó
+     * RF-29 / RN-9: toda póliza activa cuya fecha de fin ya pasó
      * cambia a VENCIDA. Se ejecuta cada vez que se consultan las pólizas.
      */
     public int actualizarVencidas() {
         try {
             this.conectar();
             if (cnx == null) return 0;
-            ps = cnx.prepareStatement("UPDATE poliza SET estatus = 'VENCIDA' WHERE estatus = 'ACTIVA' AND fechaVencimiento < CURDATE()");
+            ps = cnx.prepareStatement("UPDATE poliza SET estado = 'VENCIDA' WHERE estado = 'ACTIVA' AND fechaFin < CURDATE()");
             return ps.executeUpdate();
         } catch (SQLException ex) {
             guardarError(ex);
@@ -66,92 +74,81 @@ public class PolizaModelo extends Conexion implements DAO {
     @Override
     public List read() {
         actualizarVencidas();
-        List<PolizaEntidad> lista = new ArrayList<>();
         try {
             this.conectar();
-            if (cnx == null) return lista;
+            if (cnx == null) return new ArrayList<>();
             ps = cnx.prepareStatement(SELECT_BASE + "ORDER BY p.idPoliza");
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                lista.add(leerPoliza());
-            }
+            return llenarLista();
         } catch (SQLException ex) {
             guardarError(ex);
+            return new ArrayList<>();
         } finally {
             this.close();
         }
-        return lista;
     }
 
     // RF-17: buscar por número de póliza, nombre del cliente o placas
     public List<PolizaEntidad> buscar(String texto) {
         actualizarVencidas();
-        List<PolizaEntidad> lista = new ArrayList<>();
         try {
             this.conectar();
-            if (cnx == null) return lista;
+            if (cnx == null) return new ArrayList<>();
             ps = cnx.prepareStatement(SELECT_BASE
-                + "WHERE p.numeroPoliza LIKE ? OR c.nombre LIKE ? OR v.placas LIKE ? ORDER BY p.idPoliza");
+                + "WHERE p.numeroPoliza LIKE ? OR CONCAT_WS(' ', c.nombre, c.apellidoPaterno, c.apellidoMaterno) LIKE ? "
+                + "OR v.placas LIKE ? ORDER BY p.idPoliza");
             String patron = "%" + texto.trim() + "%";
             ps.setString(1, patron);
             ps.setString(2, patron);
             ps.setString(3, patron);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                lista.add(leerPoliza());
-            }
+            return llenarLista();
         } catch (SQLException ex) {
             guardarError(ex);
+            return new ArrayList<>();
         } finally {
             this.close();
         }
-        return lista;
     }
 
-    // Regresa el estatus que tiene guardado la póliza, o null si no existe
-    public String estatusActual(int idPoliza) {
-        return consultarTexto("SELECT estatus FROM poliza WHERE idPoliza = ?", idPoliza);
+    // Regresa el estado que tiene guardado la póliza, o null si no existe
+    public String estadoActual(int idPoliza) {
+        return consultarTexto("SELECT estado FROM poliza WHERE idPoliza = ?", idPoliza);
     }
 
-    // Regresa el estatus de una cotización, o null si no existe
-    public String estatusCotizacion(int idCotizacion) {
-        return consultarTexto("SELECT estatus FROM cotizacion WHERE idCotizacion = ?", idCotizacion);
+    // Regresa el vehículo de una póliza (0 si no existe). Se usa para revisar la póliza anterior
+    public int vehiculoDePoliza(int idPoliza) {
+        return contar("SELECT COALESCE(MAX(idVehiculo), 0) FROM poliza WHERE idPoliza = ?", idPoliza);
     }
 
-    // RN-3: cuántas coberturas tiene la póliza
+    // RN-3: cuántas coberturas tiene la póliza (tabla polizacobertura)
     public int contarCoberturas(int idPoliza) {
-        return contar("SELECT COUNT(*) FROM detallecobertura WHERE idPoliza = ?", idPoliza);
+        return contar("SELECT COUNT(*) FROM polizacobertura WHERE idPoliza = ?", idPoliza);
     }
 
-    // RN-6: cuántos pagos ya se hicieron de la póliza
-    public int contarPagosRealizados(int idPoliza) {
-        return contar("SELECT COUNT(*) FROM pago WHERE idPoliza = ? AND estatus = 'PAGADO'", idPoliza);
+    // RN-6: cuántos pagos válidos (no anulados) tiene la póliza
+    public int contarPagosValidos(int idPoliza) {
+        return contar("SELECT COUNT(*) FROM pago WHERE idPoliza = ? AND anulado = FALSE", idPoliza);
     }
 
-    // RN-6: cuántos tipos de documento distintos entregó el dueño del vehículo (deben ser 3)
-    public int contarDocumentosCliente(int idVehiculo) {
-        return contar("SELECT COUNT(DISTINCT d.tipo) FROM documento d JOIN vehiculo v ON d.idCliente = v.idCliente WHERE v.idVehiculo = ?", idVehiculo);
-    }
-
-    // RN-13: la póliza tiene registrada una cancelación
-    public boolean tieneCancelacion(int idPoliza) {
-        return contar("SELECT COUNT(*) FROM cancelacion WHERE idPoliza = ?", idPoliza) > 0;
+    // RN-13: la póliza tiene una solicitud de cancelación aprobada
+    public boolean tieneCancelacionAprobada(int idPoliza) {
+        return contar("SELECT COUNT(*) FROM solicitud s JOIN tiposolicitud t ON s.idTipoSolicitud = t.idTipoSolicitud "
+            + "WHERE s.idPoliza = ? AND t.nombre = 'Cancelación' AND s.estado = 'APROBADA'", idPoliza) > 0;
     }
 
     /**
      * RN-8: revisa si el vehículo ya tiene otra póliza activa o en trámite
      * cuyas fechas se crucen con las de esta póliza.
      */
-    public boolean hayPolizaCruzada(int idVehiculo, String inicio, String vencimiento, int idPolizaActual) {
+    public boolean hayPolizaCruzada(int idVehiculo, String inicio, String fin, int idPolizaActual) {
         try {
             this.conectar();
             if (cnx == null) return true;
             ps = cnx.prepareStatement(
                 "SELECT COUNT(*) FROM poliza WHERE idVehiculo = ? AND idPoliza <> ? "
-                + "AND estatus IN ('ACTIVA', 'EN_TRAMITE') AND fechaInicio < ? AND fechaVencimiento > ?");
+                + "AND estado IN ('ACTIVA', 'EN_TRAMITE') AND fechaInicio < ? AND fechaFin > ?");
             ps.setInt(1, idVehiculo);
             ps.setInt(2, idPolizaActual);
-            ps.setString(3, vencimiento);
+            ps.setString(3, fin);
             ps.setString(4, inicio);
             rs = ps.executeQuery();
             rs.next();
@@ -202,25 +199,18 @@ public class PolizaModelo extends Conexion implements DAO {
     // Pasa los datos de la póliza al PreparedStatement (los usan create y update)
     private void llenarParametros(PolizaEntidad p) throws SQLException {
         ps.setString(1, nulo(p.getNumeroPoliza()));
-        if (p.getIdCotizacion() > 0) {
-            ps.setInt(2, p.getIdCotizacion());
+        ps.setString(2, p.getFechaInicio());
+        ps.setString(3, p.getFechaFin());
+        ps.setDouble(4, p.getPrimaTotal());
+        ps.setString(5, enumVal(p.getEstado()));
+        ps.setInt(6, p.getIdVehiculo());
+        ps.setInt(7, p.getIdAseguradora());
+        ps.setInt(8, p.getIdFormaPago());
+        if (p.getIdPolizaAnterior() != null) {
+            ps.setInt(9, p.getIdPolizaAnterior());
         } else {
-            ps.setNull(2, java.sql.Types.INTEGER);
+            ps.setNull(9, java.sql.Types.INTEGER);
         }
-        ps.setInt(3, p.getIdVehiculo());
-        ps.setInt(4, p.getIdCompania());
-        ps.setInt(5, p.getIdUsuario());
-        ps.setInt(6, p.getIdTipo());
-        if (p.getIdPolizaAnterior() != null && p.getIdPolizaAnterior() > 0) {
-            ps.setInt(7, p.getIdPolizaAnterior());
-        } else {
-            ps.setNull(7, java.sql.Types.INTEGER);
-        }
-        ps.setString(8, nulo(p.getFechaEmision()));
-        ps.setString(9, p.getFechaInicio());
-        ps.setString(10, p.getFechaVencimiento());
-        ps.setDouble(11, p.getPrimaTotal());
-        ps.setString(12, enumVal(p.getEstatus()));
     }
 
     @Override
@@ -228,9 +218,8 @@ public class PolizaModelo extends Conexion implements DAO {
         try {
             this.conectar();
             if (cnx == null) return 0;
-            PolizaEntidad p = (PolizaEntidad) obj;
-            ps = cnx.prepareStatement("INSERT INTO poliza (numeroPoliza, idCotizacion, idVehiculo, idCompania, idUsuario, idTipo, idPolizaAnterior, fechaEmision, fechaInicio, fechaVencimiento, primaTotal, estatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            llenarParametros(p);
+            ps = cnx.prepareStatement("INSERT INTO poliza (numeroPoliza, fechaInicio, fechaFin, primaTotal, estado, idVehiculo, idAseguradora, idFormaPago, idPolizaAnterior) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            llenarParametros((PolizaEntidad) obj);
             return ps.executeUpdate();
         } catch (SQLException ex) {
             guardarError(ex);
@@ -246,9 +235,9 @@ public class PolizaModelo extends Conexion implements DAO {
             this.conectar();
             if (cnx == null) return 0;
             PolizaEntidad p = (PolizaEntidad) obj;
-            ps = cnx.prepareStatement("UPDATE poliza SET numeroPoliza = ?, idCotizacion = ?, idVehiculo = ?, idCompania = ?, idUsuario = ?, idTipo = ?, idPolizaAnterior = ?, fechaEmision = ?, fechaInicio = ?, fechaVencimiento = ?, primaTotal = ?, estatus = ? WHERE idPoliza = ?");
+            ps = cnx.prepareStatement("UPDATE poliza SET numeroPoliza = ?, fechaInicio = ?, fechaFin = ?, primaTotal = ?, estado = ?, idVehiculo = ?, idAseguradora = ?, idFormaPago = ?, idPolizaAnterior = ? WHERE idPoliza = ?");
             llenarParametros(p);
-            ps.setInt(13, p.getIdPoliza());
+            ps.setInt(10, p.getIdPoliza());
             return ps.executeUpdate();
         } catch (SQLException ex) {
             guardarError(ex);
@@ -268,12 +257,12 @@ public class PolizaModelo extends Conexion implements DAO {
             this.conectar();
             if (cnx == null) return 0;
             PolizaEntidad p = (PolizaEntidad) obj;
-            ps = cnx.prepareStatement("DELETE FROM poliza WHERE idPoliza = ? AND estatus = 'EN_TRAMITE'");
+            ps = cnx.prepareStatement("DELETE FROM poliza WHERE idPoliza = ? AND estado = 'EN_TRAMITE'");
             ps.setInt(1, p.getIdPoliza());
             return ps.executeUpdate();
         } catch (SQLException ex) {
             if (ex.getErrorCode() == 1451) {
-                mensajeError = "La póliza ya tiene coberturas, pagos o avisos registrados. Bórralos primero o regístrale una cancelación.";
+                mensajeError = "La póliza ya tiene coberturas, pagos o solicitudes registradas, por eso no se puede borrar.";
                 System.out.println("Error: " + ex.getMessage());
             } else {
                 guardarError(ex);
