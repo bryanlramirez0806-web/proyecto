@@ -1,206 +1,198 @@
-CREATE DATABASE IF NOT EXISTS polizas CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+-- =====================================================================
+-- Base de datos del Gestor de Pólizas (Equipo 5)
+-- Versión 2: basada en el nuevo diagrama entidad-relación.
+-- Único cambio respecto al diagrama: se agregó la columna "activo" a
+-- cliente y vehiculo para darlos de baja sin borrar su historial (RN-14).
+-- =====================================================================
+
+DROP DATABASE IF EXISTS polizas;
+CREATE DATABASE polizas CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE polizas;
 
-CREATE TABLE cliente (
-    idCliente INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(150) NOT NULL,
-    telefono VARCHAR(20) NOT NULL,
-    correo VARCHAR(100),
-    rfc VARCHAR(15) NOT NULL UNIQUE,
-    direccion VARCHAR(255),
-    medioContacto VARCHAR(50) CHECK (medioContacto IN ('WHATSAPP', 'CORREO', 'LLAMADA')),
-    activo BOOLEAN DEFAULT TRUE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE usuario (
-    idUsuario INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(150) NOT NULL,
-    telefono VARCHAR(20),
-    correo VARCHAR(100) NOT NULL,
-    rol VARCHAR(50) NOT NULL CHECK (rol IN ('ADMINISTRADOR', 'VENDEDOR', 'OPERACIONES')),
-    activo BOOLEAN DEFAULT TRUE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE documento (
-    idDocumento INT AUTO_INCREMENT PRIMARY KEY,
-    idCliente INT NOT NULL,
-    tipo VARCHAR(50) NOT NULL CHECK (tipo IN ('INE', 'COMPROBANTE_DOMICILIO', 'TARJETA_CIRCULACION')),
-    fechaRecepcion DATE NOT NULL,
-    rutaArchivo VARCHAR(255) NOT NULL,
-    FOREIGN KEY (idCliente) REFERENCES cliente(idCliente) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+-- ---------------------------------------------------------------------
+-- Catálogos
+-- ---------------------------------------------------------------------
 
 CREATE TABLE marca (
     idMarca INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL UNIQUE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB;
 
-CREATE TABLE submarca (
-    idSubmarca INT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE modelo (
+    idModelo INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
     idMarca INT NOT NULL,
-    nombre VARCHAR(100) NOT NULL,
-    FOREIGN KEY (idMarca) REFERENCES marca(idMarca) ON UPDATE CASCADE,
-    UNIQUE (idMarca, nombre)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+    UNIQUE (idMarca, nombre),
+    FOREIGN KEY (idMarca) REFERENCES marca(idMarca) ON UPDATE CASCADE
+) ENGINE=InnoDB;
 
-CREATE TABLE vehiculo (
-    idVehiculo INT AUTO_INCREMENT PRIMARY KEY,
-    idCliente INT NOT NULL,
-    idSubmarca INT NOT NULL,
-    modelo VARCHAR(20) NOT NULL,
-    tipoVehiculo VARCHAR(50) NOT NULL,
-    numeroSerie VARCHAR(50) NOT NULL UNIQUE,
-    placas VARCHAR(20) NOT NULL,
-    activo BOOLEAN DEFAULT TRUE,
-    FOREIGN KEY (idCliente) REFERENCES cliente(idCliente) ON UPDATE CASCADE,
-    FOREIGN KEY (idSubmarca) REFERENCES submarca(idSubmarca) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE usovehiculo (
+    idUso INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL UNIQUE
+) ENGINE=InnoDB;
 
-CREATE TABLE companiaseguros (
-    idCompania INT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE aseguradora (
+    idAseguradora INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
+    rfc VARCHAR(13) NOT NULL UNIQUE,
     telefono VARCHAR(20),
     correo VARCHAR(100),
-    sitioValidacion VARCHAR(255),
-    activo BOOLEAN DEFAULT TRUE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+    nombreContacto VARCHAR(150)
+) ENGINE=InnoDB;
 
-CREATE TABLE tipopoliza (
-    idTipo INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    descripcion TEXT,
-    activo BOOLEAN DEFAULT TRUE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE formapago (
+    idFormaPago INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL UNIQUE,
+    numeroPagos INT NOT NULL CHECK (numeroPagos >= 1)
+) ENGINE=InnoDB;
 
 CREATE TABLE cobertura (
     idCobertura INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    descripcion TEXT,
-    activo BOOLEAN DEFAULT TRUE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+    nombre VARCHAR(100) NOT NULL UNIQUE,
+    descripcion TEXT
+) ENGINE=InnoDB;
 
-CREATE TABLE cotizacion (
-    idCotizacion INT AUTO_INCREMENT PRIMARY KEY,
-    idVehiculo INT NOT NULL,
-    idUsuario INT NOT NULL,
-    idCompania INT NOT NULL,
-    idTipo INT NOT NULL,
-    fecha DATE NOT NULL,
-    costo DECIMAL(10,2) NOT NULL CHECK (costo > 0),
-    opcionPago VARCHAR(50) NOT NULL CHECK (opcionPago IN ('COMPLETO', 'PARCIALIDADES')),
-    estatus VARCHAR(50) NOT NULL CHECK (estatus IN ('PENDIENTE', 'ACEPTADA', 'RECHAZADA')),
-    FOREIGN KEY (idVehiculo) REFERENCES vehiculo(idVehiculo) ON UPDATE CASCADE,
-    FOREIGN KEY (idUsuario) REFERENCES usuario(idUsuario) ON UPDATE CASCADE,
-    FOREIGN KEY (idCompania) REFERENCES companiaseguros(idCompania) ON UPDATE CASCADE,
-    FOREIGN KEY (idTipo) REFERENCES tipopoliza(idTipo) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE metodopago (
+    idMetodoPago INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL UNIQUE
+) ENGINE=InnoDB;
+
+CREATE TABLE rol (
+    idRol INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL UNIQUE
+) ENGINE=InnoDB;
+
+CREATE TABLE tiposolicitud (
+    idTipoSolicitud INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL UNIQUE
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------
+-- Personas
+-- ---------------------------------------------------------------------
+
+CREATE TABLE cliente (
+    idCliente INT AUTO_INCREMENT PRIMARY KEY,
+    tipoPersona VARCHAR(10) NOT NULL CHECK (tipoPersona IN ('FISICA', 'MORAL')),
+    nombre VARCHAR(150) NOT NULL,
+    apellidoPaterno VARCHAR(80),
+    apellidoMaterno VARCHAR(80),
+    rfc VARCHAR(13) NOT NULL UNIQUE,
+    curp VARCHAR(18) UNIQUE,
+    telefono VARCHAR(20) NOT NULL,
+    correo VARCHAR(100),
+    fechaRegistro DATE NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE
+) ENGINE=InnoDB;
+
+CREATE TABLE usuario (
+    idUsuario INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(80) NOT NULL,
+    apellidoPaterno VARCHAR(80) NOT NULL,
+    apellidoMaterno VARCHAR(80),
+    nombreUsuario VARCHAR(50) NOT NULL UNIQUE,
+    contrasenaHash VARCHAR(64) NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    idRol INT NOT NULL,
+    FOREIGN KEY (idRol) REFERENCES rol(idRol) ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------
+-- Vehículos y pólizas
+-- ---------------------------------------------------------------------
+
+CREATE TABLE vehiculo (
+    idVehiculo INT AUTO_INCREMENT PRIMARY KEY,
+    anio INT NOT NULL CHECK (anio BETWEEN 1950 AND 2100),
+    numSerie VARCHAR(17) NOT NULL UNIQUE,
+    placas VARCHAR(15) NOT NULL UNIQUE,
+    color VARCHAR(30),
+    idCliente INT NOT NULL,
+    idModelo INT NOT NULL,
+    idUso INT NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    FOREIGN KEY (idCliente) REFERENCES cliente(idCliente) ON UPDATE CASCADE,
+    FOREIGN KEY (idModelo) REFERENCES modelo(idModelo) ON UPDATE CASCADE,
+    FOREIGN KEY (idUso) REFERENCES usovehiculo(idUso) ON UPDATE CASCADE
+) ENGINE=InnoDB;
 
 CREATE TABLE poliza (
     idPoliza INT AUTO_INCREMENT PRIMARY KEY,
-    numeroPoliza VARCHAR(50) DEFAULT NULL UNIQUE,
-    idCotizacion INT DEFAULT NULL UNIQUE,
-    idVehiculo INT NOT NULL,
-    idCompania INT NOT NULL,
-    idUsuario INT NOT NULL,
-    idTipo INT NOT NULL,
-    idPolizaAnterior INT DEFAULT NULL,
-    fechaEmision DATE DEFAULT NULL,
+    numeroPoliza VARCHAR(50) UNIQUE,
     fechaInicio DATE NOT NULL,
-    fechaVencimiento DATE NOT NULL,
+    fechaFin DATE NOT NULL,
     primaTotal DECIMAL(10,2) NOT NULL CHECK (primaTotal > 0),
-    estatus VARCHAR(50) NOT NULL CHECK (estatus IN ('EN_TRAMITE', 'ACTIVA', 'VENCIDA', 'CANCELADA')),
-    CONSTRAINT chk_fechas CHECK (fechaVencimiento > fechaInicio),
-    FOREIGN KEY (idCotizacion) REFERENCES cotizacion(idCotizacion) ON UPDATE CASCADE,
+    estado VARCHAR(15) NOT NULL CHECK (estado IN ('EN_TRAMITE', 'ACTIVA', 'VENCIDA', 'CANCELADA')),
+    idVehiculo INT NOT NULL,
+    idAseguradora INT NOT NULL,
+    idFormaPago INT NOT NULL,
+    idPolizaAnterior INT,
+    CONSTRAINT chk_vigencia CHECK (fechaFin > fechaInicio),
     FOREIGN KEY (idVehiculo) REFERENCES vehiculo(idVehiculo) ON UPDATE CASCADE,
-    FOREIGN KEY (idCompania) REFERENCES companiaseguros(idCompania) ON UPDATE CASCADE,
-    FOREIGN KEY (idUsuario) REFERENCES usuario(idUsuario) ON UPDATE CASCADE,
-    FOREIGN KEY (idTipo) REFERENCES tipopoliza(idTipo) ON UPDATE CASCADE,
+    FOREIGN KEY (idAseguradora) REFERENCES aseguradora(idAseguradora) ON UPDATE CASCADE,
+    FOREIGN KEY (idFormaPago) REFERENCES formapago(idFormaPago) ON UPDATE CASCADE,
     FOREIGN KEY (idPolizaAnterior) REFERENCES poliza(idPoliza) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB;
 
-CREATE TABLE detallecobertura (
+CREATE TABLE polizacobertura (
     idPoliza INT NOT NULL,
     idCobertura INT NOT NULL,
     sumaAsegurada DECIMAL(12,2) NOT NULL CHECK (sumaAsegurada > 0),
-    deducible DECIMAL(10,2) NOT NULL CHECK (deducible >= 0),
+    deducible DECIMAL(10,2) NOT NULL DEFAULT 0 CHECK (deducible >= 0),
     PRIMARY KEY (idPoliza, idCobertura),
     FOREIGN KEY (idPoliza) REFERENCES poliza(idPoliza) ON UPDATE CASCADE,
     FOREIGN KEY (idCobertura) REFERENCES cobertura(idCobertura) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB;
 
 CREATE TABLE pago (
     idPago INT AUTO_INCREMENT PRIMARY KEY,
-    idPoliza INT NOT NULL,
-    numeroParcialidad INT NOT NULL,
-    monto DECIMAL(10,2) NOT NULL CHECK (monto > 0),
-    fechaLimite DATE NOT NULL,
-    fechaPago DATE DEFAULT NULL,
-    metodoPago VARCHAR(50) CHECK (metodoPago IN ('EFECTIVO', 'TARJETA', 'TRANSFERENCIA')),
-    comprobante VARCHAR(100),
-    estatus VARCHAR(50) NOT NULL CHECK (estatus IN ('PENDIENTE', 'PAGADO')),
-    FOREIGN KEY (idPoliza) REFERENCES poliza(idPoliza) ON UPDATE CASCADE,
-    UNIQUE (idPoliza, numeroParcialidad)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE notificacion (
-    idNotificacion INT AUTO_INCREMENT PRIMARY KEY,
-    idPoliza INT NOT NULL,
-    idUsuario INT NOT NULL,
-    tipo VARCHAR(50) NOT NULL CHECK (tipo IN ('EMISION', 'VENCIMIENTO')),
     fecha DATE NOT NULL,
-    medio VARCHAR(50) NOT NULL CHECK (medio IN ('WHATSAPP', 'CORREO', 'LLAMADA')),
-    costoRenovacion DECIMAL(10,2) NOT NULL CHECK (costoRenovacion >= 0),
-    realizada BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (idPoliza) REFERENCES poliza(idPoliza) ON UPDATE CASCADE,
-    FOREIGN KEY (idUsuario) REFERENCES usuario(idUsuario) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE cancelacion (
-    idCancelacion INT AUTO_INCREMENT PRIMARY KEY,
-    idPoliza INT NOT NULL UNIQUE,
+    monto DECIMAL(10,2) NOT NULL CHECK (monto > 0),
+    referencia VARCHAR(100),
+    anulado BOOLEAN NOT NULL DEFAULT FALSE,
+    motivoAnulacion VARCHAR(255),
+    idPoliza INT NOT NULL,
+    idMetodoPago INT NOT NULL,
     idUsuario INT NOT NULL,
-    fechaSolicitud DATE NOT NULL,
-    motivo TEXT NOT NULL,
-    montoDevolucion DECIMAL(10,2) NOT NULL CHECK (montoDevolucion >= 0),
-    estatusDevolucion VARCHAR(50) NOT NULL CHECK (estatusDevolucion IN ('NO_APLICA', 'PENDIENTE', 'REALIZADA')),
     FOREIGN KEY (idPoliza) REFERENCES poliza(idPoliza) ON UPDATE CASCADE,
+    FOREIGN KEY (idMetodoPago) REFERENCES metodopago(idMetodoPago) ON UPDATE CASCADE,
     FOREIGN KEY (idUsuario) REFERENCES usuario(idUsuario) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB;
 
-INSERT INTO usuario (nombre, telefono, correo, rol) VALUES
-('Bryan Ramírez', '9846721713', 'bryan@despacho.com', 'VENDEDOR'),
-('Diego Cruz', '9851234567', 'diego@despacho.com', 'ADMINISTRADOR'),
-('Jonathan Alonso', '9842345678', 'jonathan@despacho.com', 'OPERACIONES');
+CREATE TABLE solicitud (
+    idSolicitud INT AUTO_INCREMENT PRIMARY KEY,
+    fechaSolicitud DATE NOT NULL,
+    descripcion TEXT NOT NULL,
+    estado VARCHAR(15) NOT NULL DEFAULT 'PENDIENTE' CHECK (estado IN ('PENDIENTE', 'APROBADA', 'RECHAZADA')),
+    fechaResolucion DATE,
+    motivoResolucion VARCHAR(255),
+    idPoliza INT NOT NULL,
+    idTipoSolicitud INT NOT NULL,
+    idAgente INT NOT NULL,
+    idAutorizador INT,
+    FOREIGN KEY (idPoliza) REFERENCES poliza(idPoliza) ON UPDATE CASCADE,
+    FOREIGN KEY (idTipoSolicitud) REFERENCES tiposolicitud(idTipoSolicitud) ON UPDATE CASCADE,
+    FOREIGN KEY (idAgente) REFERENCES usuario(idUsuario) ON UPDATE CASCADE,
+    FOREIGN KEY (idAutorizador) REFERENCES usuario(idUsuario) ON UPDATE CASCADE
+) ENGINE=InnoDB;
 
-INSERT INTO cliente (nombre, telefono, correo, rfc, direccion, medioContacto) VALUES
-('Carlos Mendoza López', '9847654321', 'carlos.mendoza@correo.com', 'MELC850214AB3', 'Calle 10 Norte 245, Playa del Carmen, Q. Roo', 'WHATSAPP'),
-('María Fernández Ortiz', '9846176891', 'maria.fernandez@correo.com', 'FEOM900530HK1', 'Av. Constituyentes 120, Playa del Carmen, Q. Roo', 'CORREO'),
-('Luis Herrera Castillo', '9856677627', 'luis.herrera@correo.com', 'HECL781122PQ7', 'Calle Cedros 33, Playa del Carmen, Q. Roo', 'LLAMADA');
-
-INSERT INTO documento (idCliente, tipo, fechaRecepcion, rutaArchivo) VALUES
-(1, 'INE', '2026-11-10', 'C:/documentos/cliente1/ine.pdf'),
-(1, 'COMPROBANTE_DOMICILIO', '2026-11-10', 'C:/documentos/cliente1/domicilio.pdf'),
-(1, 'TARJETA_CIRCULACION', '2026-11-10', 'C:/documentos/cliente1/tarjeta.pdf'),
-(2, 'INE', '2026-11-12', 'C:/documentos/cliente2/ine.pdf');
+-- =====================================================================
+-- Datos de prueba
+-- =====================================================================
 
 INSERT INTO marca (nombre) VALUES ('Nissan'), ('Chevrolet'), ('Toyota'), ('Volkswagen');
 
-INSERT INTO submarca (idMarca, nombre) VALUES
-(1, 'Versa'), (1, 'Sentra'), (2, 'Aveo'), (2, 'Onix'), (3, 'Corolla'), (4, 'Jetta');
+INSERT INTO modelo (nombre, idMarca) VALUES
+('Versa', 1), ('Sentra', 1), ('Aveo', 2), ('Onix', 2), ('Corolla', 3), ('Hilux', 3), ('Jetta', 4);
 
-INSERT INTO vehiculo (idCliente, idSubmarca, modelo, tipoVehiculo, numeroSerie, placas) VALUES
-(1, 1, '2024', 'Sedán', '3N1CN7AD4RK123456', 'UTV-123-A'),
-(2, 5, '2023', 'Sedán', '5YFBURHE5PP654321', 'UTW-456-B'),
-(3, 4, '2022', 'Hatchback', '3G1J85CC5NS987654', 'UTX-789-C');
+INSERT INTO usovehiculo (nombre) VALUES ('Particular'), ('Comercial'), ('Servicio público'), ('Carga');
 
-INSERT INTO companiaseguros (nombre, telefono, correo, sitioValidacion) VALUES
-('GNP Seguros', '8005002000', 'contacto@gnp.com.mx', 'https://www.gnp.com.mx/validar'),
-('Qualitas', '8007002262', 'contacto@qualitas.com.mx', 'https://www.qualitas.com.mx/validar');
+INSERT INTO aseguradora (nombre, rfc, telefono, correo, nombreContacto) VALUES
+('GNP Seguros', 'GNS921124AA1', '8005002000', 'contacto@gnp.com.mx', 'Laura Gómez Ruiz'),
+('Qualitas', 'QCS931209BB2', '8007002262', 'contacto@qualitas.com.mx', 'Pedro Sánchez Mora');
 
-INSERT INTO tipopoliza (nombre, descripcion) VALUES
-('Amplia', 'Cobertura completa que incluye daños materiales y robo total'),
-('Limitada', 'Cubre responsabilidad civil y robo total del vehículo'),
-('Daños a Terceros', 'Cubre únicamente los daños causados a terceros');
+INSERT INTO formapago (nombre, numeroPagos) VALUES
+('Contado', 1), ('Semestral', 2), ('Trimestral', 4), ('Mensual', 12);
 
 INSERT INTO cobertura (nombre, descripcion) VALUES
 ('Daños Materiales', 'Cubre los daños sufridos por el vehículo asegurado'),
@@ -208,27 +200,54 @@ INSERT INTO cobertura (nombre, descripcion) VALUES
 ('Responsabilidad Civil', 'Cubre daños a terceros en sus bienes y personas'),
 ('Gastos Médicos Ocupantes', 'Cubre la atención médica de los ocupantes del vehículo');
 
-INSERT INTO cotizacion (idVehiculo, idUsuario, idCompania, idTipo, fecha, costo, opcionPago, estatus) VALUES
-(1, 1, 1, 1, '2026-11-10', 12500.00, 'COMPLETO', 'ACEPTADA'),
-(2, 1, 2, 2, '2026-11-12', 8400.00, 'PARCIALIDADES', 'ACEPTADA'),
-(3, 1, 1, 3, '2026-11-14', 5200.00, 'COMPLETO', 'PENDIENTE');
+INSERT INTO metodopago (nombre) VALUES ('Efectivo'), ('Tarjeta de débito'), ('Tarjeta de crédito'), ('Transferencia');
 
-INSERT INTO poliza (numeroPoliza, idCotizacion, idVehiculo, idCompania, idUsuario, idTipo, fechaEmision, fechaInicio, fechaVencimiento, primaTotal, estatus) VALUES
-('GNP-2026-0001', 1, 1, 1, 1, 1, '2026-11-11', '2026-11-11', '2027-11-11', 12500.00, 'ACTIVA');
+INSERT INTO rol (nombre) VALUES ('ADMINISTRADOR'), ('AGENTE'), ('SUPERVISOR');
 
-INSERT INTO poliza (numeroPoliza, idCotizacion, idVehiculo, idCompania, idUsuario, idTipo, fechaEmision, fechaInicio, fechaVencimiento, primaTotal, estatus) VALUES
-(NULL, 2, 2, 2, 1, 2, NULL, '2026-11-20', '2027-11-20', 8400.00, 'EN_TRAMITE');
+INSERT INTO tiposolicitud (nombre) VALUES ('Cancelación'), ('Endoso'), ('Renovación'), ('Aclaración');
 
-INSERT INTO detallecobertura (idPoliza, idCobertura, sumaAsegurada, deducible) VALUES
-(1, 1, 250000.00, 5000.00),
-(1, 2, 250000.00, 0.00),
+-- Contraseña de prueba de los tres usuarios: 1234
+INSERT INTO usuario (nombre, apellidoPaterno, apellidoMaterno, nombreUsuario, contrasenaHash, idRol) VALUES
+('Bryan', 'Lázaro', 'Ramírez', 'bryan', SHA2('1234', 256), 2),
+('Diego Jampierd', 'Cruz', 'Contreras', 'diego', SHA2('1234', 256), 1),
+('Jonathan Gael', 'Alonso', 'López Arcos', 'jonathan', SHA2('1234', 256), 3);
+
+INSERT INTO cliente (tipoPersona, nombre, apellidoPaterno, apellidoMaterno, rfc, curp, telefono, correo, fechaRegistro) VALUES
+('FISICA', 'Carlos', 'Mendoza', 'López', 'MELC850214AB3', 'MELC850214HQRNPR05', '9847654321', 'carlos.mendoza@correo.com', '2025-11-05'),
+('FISICA', 'María', 'Fernández', 'Ortiz', 'FEOM900530HK1', 'FEOM900530MQRRRR02', '9846176891', 'maria.fernandez@correo.com', '2026-11-12'),
+('FISICA', 'Luis', 'Herrera', 'Castillo', 'HECL781122PQ7', 'HECL781122HQRRSS09', '9856677627', 'luis.herrera@correo.com', '2026-11-14'),
+('MORAL', 'Transportes Riviera Maya S.A. de C.V.', NULL, NULL, 'TRM150310AB2', NULL, '9988841200', 'contacto@trmaya.com', '2026-11-16');
+
+INSERT INTO vehiculo (anio, numSerie, placas, color, idCliente, idModelo, idUso) VALUES
+(2024, '3N1CN7AD4RK123456', 'UTV-123-A', 'Blanco', 1, 1, 1),
+(2023, '5YFBURHE5PP654321', 'UTW-456-B', 'Gris', 2, 5, 1),
+(2022, '3G1J85CC5NS987654', 'UTX-789-C', 'Rojo', 3, 4, 1),
+(2025, 'MR0HA3CD7S0112233', 'URA-101-D', 'Negro', 4, 6, 4);
+
+-- Póliza 1: la del año pasado de Carlos, ya vencida
+INSERT INTO poliza (numeroPoliza, fechaInicio, fechaFin, primaTotal, estado, idVehiculo, idAseguradora, idFormaPago, idPolizaAnterior) VALUES
+('GNP-2025-0001', '2025-11-11', '2026-11-11', 11800.00, 'VENCIDA', 1, 1, 1, NULL);
+-- Póliza 2: renovación de la póliza 1, activa
+INSERT INTO poliza (numeroPoliza, fechaInicio, fechaFin, primaTotal, estado, idVehiculo, idAseguradora, idFormaPago, idPolizaAnterior) VALUES
+('GNP-2026-0001', '2026-11-11', '2027-11-11', 12500.00, 'ACTIVA', 1, 1, 1, 1);
+-- Póliza 3: de María, en trámite (ya tiene cobertura y primer pago; falta el número de póliza)
+INSERT INTO poliza (numeroPoliza, fechaInicio, fechaFin, primaTotal, estado, idVehiculo, idAseguradora, idFormaPago, idPolizaAnterior) VALUES
+(NULL, '2026-11-20', '2027-11-20', 8400.00, 'EN_TRAMITE', 2, 2, 2, NULL);
+
+INSERT INTO polizacobertura (idPoliza, idCobertura, sumaAsegurada, deducible) VALUES
+(1, 1, 240000.00, 5000.00),
 (1, 3, 3000000.00, 0.00),
-(2, 3, 3000000.00, 0.00);
+(2, 1, 250000.00, 5000.00),
+(2, 2, 250000.00, 0.00),
+(2, 3, 3000000.00, 0.00),
+(3, 3, 3000000.00, 0.00);
 
-INSERT INTO pago (idPoliza, numeroParcialidad, monto, fechaLimite, fechaPago, metodoPago, comprobante, estatus) VALUES
-(1, 1, 12500.00, '2026-11-11', '2026-11-11', 'TARJETA', 'COMP-0001', 'PAGADO'),
-(2, 1, 4200.00, '2026-11-20', NULL, NULL, NULL, 'PENDIENTE'),
-(2, 2, 4200.00, '2026-12-20', NULL, NULL, NULL, 'PENDIENTE');
+INSERT INTO pago (fecha, monto, referencia, anulado, motivoAnulacion, idPoliza, idMetodoPago, idUsuario) VALUES
+('2025-11-11', 11800.00, 'COMP-0001', FALSE, NULL, 1, 3, 1),
+('2026-11-10', 12500.00, 'COMP-0102', TRUE, 'Se cobró con la tarjeta equivocada', 2, 3, 1),
+('2026-11-11', 12500.00, 'COMP-0103', FALSE, NULL, 2, 3, 1),
+('2026-11-20', 4200.00, 'TRF-88213', FALSE, NULL, 3, 4, 1);
 
-INSERT INTO notificacion (idPoliza, idUsuario, tipo, fecha, medio, costoRenovacion, realizada) VALUES
-(1, 1, 'EMISION', '2026-11-11', 'WHATSAPP', 0.00, 1);
+INSERT INTO solicitud (fechaSolicitud, descripcion, estado, fechaResolucion, motivoResolucion, idPoliza, idTipoSolicitud, idAgente, idAutorizador) VALUES
+('2026-11-15', 'El cliente pide cambiar el correo de envío de la póliza', 'APROBADA', '2026-11-16', 'Cambio de datos de contacto sin costo', 2, 2, 1, 2),
+('2026-11-25', 'El cliente pregunta si puede agregar Gastos Médicos Ocupantes', 'PENDIENTE', NULL, NULL, 2, 4, 1, NULL);
