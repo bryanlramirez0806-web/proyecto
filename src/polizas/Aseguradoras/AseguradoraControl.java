@@ -23,14 +23,14 @@ public class AseguradoraControl {
     private String validar() {
         String nombre = vista.txtNombre.getText().trim();
         if (nombre.isEmpty()) {
-            return "Escribe el nombre.";
+            return "El campo Nombre es obligatorio.";
         }
         if (nombre.length() > 100) {
             return "Nombre no puede tener más de 100 caracteres.";
         }
         String rfc = vista.txtRfc.getText().trim();
         if (rfc.isEmpty()) {
-            return "Escribe el RFC.";
+            return "El campo RFC es obligatorio.";
         }
         if (rfc.length() > 13) {
             return "RFC no puede tener más de 13 caracteres.";
@@ -39,6 +39,9 @@ public class AseguradoraControl {
             return "El RFC no tiene un formato válido (12 o 13 caracteres).";
         }
         String telefono = vista.txtTelefono.getText().trim();
+        if (telefono.isEmpty()) {
+            return "El campo Teléfono es obligatorio.";
+        }
         if (telefono.length() > 20) {
             return "Teléfono no puede tener más de 20 caracteres.";
         }
@@ -46,6 +49,9 @@ public class AseguradoraControl {
             return "El teléfono debe tener 10 números.";
         }
         String correo = vista.txtCorreo.getText().trim();
+        if (correo.isEmpty()) {
+            return "El campo Correo es obligatorio.";
+        }
         if (correo.length() > 100) {
             return "Correo no puede tener más de 100 caracteres.";
         }

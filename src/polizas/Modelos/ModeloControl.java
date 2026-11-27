@@ -31,7 +31,7 @@ public class ModeloControl {
     private String validar() {
         String nombre = vista.txtNombre.getText().trim();
         if (nombre.isEmpty()) {
-            return "Escribe el nombre.";
+            return "El campo Nombre es obligatorio.";
         }
         if (nombre.length() > 100) {
             return "Nombre no puede tener más de 100 caracteres.";

@@ -119,6 +119,25 @@ public class PolizaModelo extends Conexion implements DAO {
         return contar("SELECT COALESCE(MAX(idVehiculo), 0) FROM poliza WHERE idPoliza = ?", idPoliza);
     }
 
+    // RN-12: revisa si la póliza anterior ya fue renovada por otra póliza
+    public boolean yaFueRenovada(int idPolizaAnterior, int idPolizaActual) {
+        try {
+            this.conectar();
+            if (cnx == null) return true;
+            ps = cnx.prepareStatement("SELECT COUNT(*) FROM poliza WHERE idPolizaAnterior = ? AND idPoliza <> ?");
+            ps.setInt(1, idPolizaAnterior);
+            ps.setInt(2, idPolizaActual);
+            rs = ps.executeQuery();
+            rs.next();
+            return rs.getInt(1) > 0;
+        } catch (SQLException ex) {
+            guardarError(ex);
+            return true;
+        } finally {
+            this.close();
+        }
+    }
+
     // RN-3: cuántas coberturas tiene la póliza (tabla polizacobertura)
     public int contarCoberturas(int idPoliza) {
         return contar("SELECT COUNT(*) FROM polizacobertura WHERE idPoliza = ?", idPoliza);

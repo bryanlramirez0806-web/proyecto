@@ -71,8 +71,8 @@ public class AseguradoraModelo extends Conexion implements DAO {
             ps = cnx.prepareStatement("INSERT INTO aseguradora (nombre, rfc, telefono, correo, nombreContacto) VALUES (?, ?, ?, ?, ?)");
             ps.setString(1, x.getNombre().trim());
             ps.setString(2, x.getRfc().trim().toUpperCase());
-            ps.setString(3, nulo(x.getTelefono()));
-            ps.setString(4, nulo(x.getCorreo()));
+            ps.setString(3, x.getTelefono().trim());
+            ps.setString(4, x.getCorreo().trim());
             ps.setString(5, nulo(x.getNombreContacto()));
             return ps.executeUpdate();
         } catch (SQLException ex) {
@@ -92,8 +92,8 @@ public class AseguradoraModelo extends Conexion implements DAO {
             ps = cnx.prepareStatement("UPDATE aseguradora SET nombre = ?, rfc = ?, telefono = ?, correo = ?, nombreContacto = ? WHERE idAseguradora = ?");
             ps.setString(1, x.getNombre().trim());
             ps.setString(2, x.getRfc().trim().toUpperCase());
-            ps.setString(3, nulo(x.getTelefono()));
-            ps.setString(4, nulo(x.getCorreo()));
+            ps.setString(3, x.getTelefono().trim());
+            ps.setString(4, x.getCorreo().trim());
             ps.setString(5, nulo(x.getNombreContacto()));
             ps.setInt(6, x.getIdAseguradora());
             return ps.executeUpdate();

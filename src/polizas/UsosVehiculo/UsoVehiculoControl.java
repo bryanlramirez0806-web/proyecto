@@ -23,7 +23,7 @@ public class UsoVehiculoControl {
     private String validar() {
         String nombre = vista.txtNombre.getText().trim();
         if (nombre.isEmpty()) {
-            return "Escribe el nombre.";
+            return "El campo Nombre es obligatorio.";
         }
         if (nombre.length() > 50) {
             return "Nombre no puede tener más de 50 caracteres.";

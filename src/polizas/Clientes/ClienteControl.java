@@ -62,12 +62,13 @@ public class ClienteControl {
                 return "El RFC de una persona moral debe tener 12 caracteres (ej. TRM150310AB2).";
             }
         }
-        // RN-5: todo cliente debe tener teléfono (WhatsApp)
+        // RN-5: todo cliente debe tener teléfono
         if (!c.getTelefono().matches("\\d{10}")) {
             return "El teléfono debe tener 10 números, sin espacios ni guiones.";
         }
-        if (!c.getCorreo().isEmpty() && !c.getCorreo().matches("^[\\w.+-]+@[\\w-]+\\.[\\w.]+$")) {
-            return "El correo no tiene un formato válido.";
+        // RN-5: todo cliente debe tener teléfono y correo
+        if (!c.getCorreo().matches("^[\\w.+-]+@[\\w-]+\\.[\\w.]+$")) {
+            return "Escribe un correo válido (ej. nombre@correo.com).";
         }
         return null;
     }

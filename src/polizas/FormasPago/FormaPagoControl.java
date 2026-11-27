@@ -23,14 +23,14 @@ public class FormaPagoControl {
     private String validar() {
         String nombre = vista.txtNombre.getText().trim();
         if (nombre.isEmpty()) {
-            return "Escribe el nombre.";
+            return "El campo Nombre es obligatorio.";
         }
         if (nombre.length() > 50) {
             return "Nombre no puede tener más de 50 caracteres.";
         }
         String numeroPagos = vista.txtNumeroPagos.getText().trim();
         if (numeroPagos.isEmpty()) {
-            return "Escribe el número de pagos.";
+            return "El campo N° de pagos es obligatorio.";
         }
         if (!numeroPagos.matches("\\d+") || Integer.parseInt(numeroPagos) < 1 || Integer.parseInt(numeroPagos) > 12) {
             return "N° de pagos debe ser un número entre 1 y 12.";

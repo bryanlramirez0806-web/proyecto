@@ -78,8 +78,13 @@ public class PolizaControl {
             if (vehiculoAnterior == 0) return "La póliza anterior #" + ant + " no existe.";
             Vehiculo v = (Vehiculo) pv.cmbVehiculo.getSelectedItem();
             if (vehiculoAnterior != v.getIdVehiculo()) return "La póliza anterior debe ser del mismo vehículo.";
-            if (!pv.txtIdPoliza.getText().isEmpty() && ant.equals(pv.txtIdPoliza.getText())) {
+            int idActual = pv.txtIdPoliza.getText().isEmpty() ? 0 : Integer.parseInt(pv.txtIdPoliza.getText());
+            if (Integer.parseInt(ant) == idActual) {
                 return "Una póliza no puede ser su propia póliza anterior.";
+            }
+            // RN-12: cada póliza se renueva una sola vez
+            if (pm.yaFueRenovada(Integer.parseInt(ant), idActual)) {
+                return "La póliza #" + ant + " ya fue renovada por otra póliza. Cada póliza se renueva una sola vez.";
             }
         }
         return null;

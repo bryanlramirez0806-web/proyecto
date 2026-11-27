@@ -45,7 +45,7 @@ public class Conexion {
         System.out.println("Error: " + ex.getMessage());
         switch (ex.getErrorCode()) {
             case 1062:
-                mensajeError = "Ya existe un registro con ese dato (RFC, número de serie o número de póliza repetido).";
+                mensajeError = "Ya existe un registro con ese dato (RFC, CURP, número de serie, placas o número de póliza repetido).";
                 break;
             case 1451:
                 mensajeError = "No se puede borrar porque tiene otros registros ligados.";

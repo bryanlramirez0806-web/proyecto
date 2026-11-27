@@ -1,6 +1,7 @@
 -- =====================================================================
 -- Base de datos del Gestor de Pólizas (Equipo 5)
 -- Versión 2: basada en el nuevo diagrama entidad-relación.
+-- Las restricciones CHECK y UNIQUE salen de las reglas de negocio (RN).
 -- Único cambio respecto al diagrama: se agregó la columna "activo" a
 -- cliente y vehiculo para darlos de baja sin borrar su historial (RN-14).
 -- =====================================================================
@@ -35,8 +36,8 @@ CREATE TABLE aseguradora (
     idAseguradora INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     rfc VARCHAR(13) NOT NULL UNIQUE,
-    telefono VARCHAR(20),
-    correo VARCHAR(100),
+    telefono VARCHAR(20) NOT NULL,
+    correo VARCHAR(100) NOT NULL,
     nombreContacto VARCHAR(150)
 ) ENGINE=InnoDB;
 
@@ -80,7 +81,7 @@ CREATE TABLE cliente (
     rfc VARCHAR(13) NOT NULL UNIQUE,
     curp VARCHAR(18) UNIQUE,
     telefono VARCHAR(20) NOT NULL,
-    correo VARCHAR(100),
+    correo VARCHAR(100) NOT NULL,
     fechaRegistro DATE NOT NULL,
     activo BOOLEAN NOT NULL DEFAULT TRUE
 ) ENGINE=InnoDB;
@@ -126,7 +127,7 @@ CREATE TABLE poliza (
     idVehiculo INT NOT NULL,
     idAseguradora INT NOT NULL,
     idFormaPago INT NOT NULL,
-    idPolizaAnterior INT,
+    idPolizaAnterior INT UNIQUE, -- RN-12: cada póliza se renueva una sola vez
     CONSTRAINT chk_vigencia CHECK (fechaFin > fechaInicio),
     FOREIGN KEY (idVehiculo) REFERENCES vehiculo(idVehiculo) ON UPDATE CASCADE,
     FOREIGN KEY (idAseguradora) REFERENCES aseguradora(idAseguradora) ON UPDATE CASCADE,
@@ -202,7 +203,7 @@ INSERT INTO cobertura (nombre, descripcion) VALUES
 
 INSERT INTO metodopago (nombre) VALUES ('Efectivo'), ('Tarjeta de débito'), ('Tarjeta de crédito'), ('Transferencia');
 
-INSERT INTO rol (nombre) VALUES ('ADMINISTRADOR'), ('AGENTE'), ('SUPERVISOR');
+INSERT INTO rol (nombre) VALUES ('ADMINISTRADOR'), ('AGENTE'), ('OPERACIONES');
 
 INSERT INTO tiposolicitud (nombre) VALUES ('Cancelación'), ('Endoso'), ('Renovación'), ('Aclaración');
 
