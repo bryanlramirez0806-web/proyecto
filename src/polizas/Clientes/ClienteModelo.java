@@ -8,6 +8,8 @@ import polizas.General.DAO;
 
 public class ClienteModelo extends Conexion implements DAO {
 
+    private static final String ORDEN = " ORDER BY nombre, apellidoPaterno";
+
     public ClienteModelo() {
         super();
     }
@@ -16,75 +18,78 @@ public class ClienteModelo extends Conexion implements DAO {
     private Cliente leerCliente() throws SQLException {
         return new Cliente(
             rs.getInt("idCliente"),
+            rs.getString("tipoPersona"),
             rs.getString("nombre"),
+            rs.getString("apellidoPaterno"),
+            rs.getString("apellidoMaterno"),
+            rs.getString("rfc"),
+            rs.getString("curp"),
             rs.getString("telefono"),
             rs.getString("correo"),
-            rs.getString("rfc"),
-            rs.getString("direccion"),
-            rs.getString("medioContacto"),
+            rs.getString("fechaRegistro"),
             rs.getBoolean("activo")
         );
     }
 
+    // Ejecuta un SELECT ya preparado y regresa la lista de clientes
+    private List<Cliente> llenarLista() throws SQLException {
+        List<Cliente> lista = new ArrayList<>();
+        rs = ps.executeQuery();
+        while (rs.next()) {
+            lista.add(leerCliente());
+        }
+        return lista;
+    }
+
     @Override
     public List read() {
-        List<Cliente> lista = new ArrayList<>();
         try {
             this.conectar();
-            if (cnx == null) return lista;
-            ps = cnx.prepareStatement("SELECT * FROM cliente ORDER BY nombre");
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                lista.add(leerCliente());
-            }
+            if (cnx == null) return new ArrayList<>();
+            ps = cnx.prepareStatement("SELECT * FROM cliente" + ORDEN);
+            return llenarLista();
         } catch (SQLException ex) {
             guardarError(ex);
+            return new ArrayList<>();
         } finally {
             this.close();
         }
-        return lista;
     }
 
     // Solo los clientes activos (para escogerlos en Vehículos)
     public List<Cliente> readActivos() {
-        List<Cliente> lista = new ArrayList<>();
         try {
             this.conectar();
-            if (cnx == null) return lista;
-            ps = cnx.prepareStatement("SELECT * FROM cliente WHERE activo = TRUE ORDER BY nombre");
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                lista.add(leerCliente());
-            }
+            if (cnx == null) return new ArrayList<>();
+            ps = cnx.prepareStatement("SELECT * FROM cliente WHERE activo = TRUE" + ORDEN);
+            return llenarLista();
         } catch (SQLException ex) {
             guardarError(ex);
+            return new ArrayList<>();
         } finally {
             this.close();
         }
-        return lista;
     }
 
-    // RF-02: buscar por nombre, RFC o teléfono
+    // RF-02: buscar por nombre, apellidos, RFC, CURP o teléfono
     public List<Cliente> buscar(String texto) {
-        List<Cliente> lista = new ArrayList<>();
         try {
             this.conectar();
-            if (cnx == null) return lista;
-            ps = cnx.prepareStatement("SELECT * FROM cliente WHERE nombre LIKE ? OR rfc LIKE ? OR telefono LIKE ? ORDER BY nombre");
+            if (cnx == null) return new ArrayList<>();
+            ps = cnx.prepareStatement("SELECT * FROM cliente WHERE "
+                + "CONCAT_WS(' ', nombre, apellidoPaterno, apellidoMaterno) LIKE ? "
+                + "OR rfc LIKE ? OR curp LIKE ? OR telefono LIKE ?" + ORDEN);
             String patron = "%" + texto.trim() + "%";
-            ps.setString(1, patron);
-            ps.setString(2, patron);
-            ps.setString(3, patron);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                lista.add(leerCliente());
+            for (int i = 1; i <= 4; i++) {
+                ps.setString(i, patron);
             }
+            return llenarLista();
         } catch (SQLException ex) {
             guardarError(ex);
+            return new ArrayList<>();
         } finally {
             this.close();
         }
-        return lista;
     }
 
     @Override
@@ -93,14 +98,16 @@ public class ClienteModelo extends Conexion implements DAO {
             this.conectar();
             if (cnx == null) return 0;
             Cliente c = (Cliente) obj;
-            ps = cnx.prepareStatement("INSERT INTO cliente (nombre, telefono, correo, rfc, direccion, medioContacto, activo) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            ps.setString(1, c.getNombre().trim());
-            ps.setString(2, c.getTelefono().trim());
-            ps.setString(3, nulo(c.getCorreo()));
-            ps.setString(4, c.getRfc().trim().toUpperCase());
-            ps.setString(5, nulo(c.getDireccion()));
-            ps.setString(6, enumVal(c.getMedioContacto()));
-            ps.setBoolean(7, true);
+            ps = cnx.prepareStatement("INSERT INTO cliente (tipoPersona, nombre, apellidoPaterno, apellidoMaterno, rfc, curp, telefono, correo, fechaRegistro, activo) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURDATE(), TRUE)");
+            ps.setString(1, c.getTipoPersona());
+            ps.setString(2, c.getNombre().trim());
+            ps.setString(3, nulo(c.getApellidoPaterno()));
+            ps.setString(4, nulo(c.getApellidoMaterno()));
+            ps.setString(5, c.getRfc().trim().toUpperCase());
+            ps.setString(6, enumVal(c.getCurp()));
+            ps.setString(7, c.getTelefono().trim());
+            ps.setString(8, nulo(c.getCorreo()));
             return ps.executeUpdate();
         } catch (SQLException ex) {
             guardarError(ex);
@@ -116,15 +123,19 @@ public class ClienteModelo extends Conexion implements DAO {
             this.conectar();
             if (cnx == null) return 0;
             Cliente c = (Cliente) obj;
-            ps = cnx.prepareStatement("UPDATE cliente SET nombre = ?, telefono = ?, correo = ?, rfc = ?, direccion = ?, medioContacto = ?, activo = ? WHERE idCliente = ?");
-            ps.setString(1, c.getNombre().trim());
-            ps.setString(2, c.getTelefono().trim());
-            ps.setString(3, nulo(c.getCorreo()));
-            ps.setString(4, c.getRfc().trim().toUpperCase());
-            ps.setString(5, nulo(c.getDireccion()));
-            ps.setString(6, enumVal(c.getMedioContacto()));
-            ps.setBoolean(7, c.isActivo());
-            ps.setInt(8, c.getIdCliente());
+            // La fecha de registro no se cambia
+            ps = cnx.prepareStatement("UPDATE cliente SET tipoPersona = ?, nombre = ?, apellidoPaterno = ?, apellidoMaterno = ?, "
+                + "rfc = ?, curp = ?, telefono = ?, correo = ?, activo = ? WHERE idCliente = ?");
+            ps.setString(1, c.getTipoPersona());
+            ps.setString(2, c.getNombre().trim());
+            ps.setString(3, nulo(c.getApellidoPaterno()));
+            ps.setString(4, nulo(c.getApellidoMaterno()));
+            ps.setString(5, c.getRfc().trim().toUpperCase());
+            ps.setString(6, enumVal(c.getCurp()));
+            ps.setString(7, c.getTelefono().trim());
+            ps.setString(8, nulo(c.getCorreo()));
+            ps.setBoolean(9, c.isActivo());
+            ps.setInt(10, c.getIdCliente());
             return ps.executeUpdate();
         } catch (SQLException ex) {
             guardarError(ex);
@@ -135,17 +146,16 @@ public class ClienteModelo extends Conexion implements DAO {
     }
 
     /**
-     * RN-14: no se puede dar de baja a un cliente que tenga pólizas activas
-     * o en trámite, o pagos pendientes. Regresa true si tiene alguno.
+     * RN-14: no se puede dar de baja a un cliente que tenga pólizas
+     * activas o en trámite. Regresa true si tiene alguna.
      */
-    public boolean tienePendientes(int idCliente) {
+    public boolean tienePolizasVigentes(int idCliente) {
         try {
             this.conectar();
             if (cnx == null) return true;
             ps = cnx.prepareStatement(
                 "SELECT COUNT(*) FROM poliza p JOIN vehiculo v ON p.idVehiculo = v.idVehiculo "
-                + "WHERE v.idCliente = ? AND (p.estatus IN ('ACTIVA', 'EN_TRAMITE') "
-                + "OR EXISTS (SELECT 1 FROM pago g WHERE g.idPoliza = p.idPoliza AND g.estatus = 'PENDIENTE'))");
+                + "WHERE v.idCliente = ? AND p.estado IN ('ACTIVA', 'EN_TRAMITE')");
             ps.setInt(1, idCliente);
             rs = ps.executeQuery();
             rs.next();
@@ -160,7 +170,7 @@ public class ClienteModelo extends Conexion implements DAO {
 
     /**
      * Baja del cliente (RF-04). No se borra el registro, solo se desactiva
-     * para guardar el historial (RN-14).
+     * para guardar el historial de sus pólizas (RN-14).
      */
     @Override
     public int delete(Object obj) {

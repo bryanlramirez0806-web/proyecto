@@ -5,90 +5,47 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
 public class ClienteTM extends AbstractTableModel {
-    protected List<Cliente> clienteLista;
-    protected String[] encabezados = {"ID", "Nombre", "Teléfono", "Correo", "RFC", "Dirección", "Medio Contacto", "Activo"};
-
-    public ClienteTM() {
-        clienteLista = new ArrayList<>();
-        this.setColumnNames(encabezados);
-    }
+    private List<Cliente> lista = new ArrayList<>();
+    private final String[] encabezados = {"ID", "Tipo", "Nombre", "RFC", "CURP", "Teléfono", "Correo", "Registro", "Activo"};
 
     @Override
-    public String getColumnName(int cantidad) {
-        return encabezados[cantidad];
-    }
+    public int getRowCount() { return lista.size(); }
 
     @Override
-    public Class<?> getColumnClass(int columnIndex) {
-        switch (columnIndex) {
+    public int getColumnCount() { return encabezados.length; }
+
+    @Override
+    public String getColumnName(int col) { return encabezados[col]; }
+
+    @Override
+    public Class<?> getColumnClass(int col) {
+        switch (col) {
             case 0: return Integer.class;
-            case 7: return Boolean.class;
+            case 8: return Boolean.class;
             default: return String.class;
         }
     }
 
-    public void setColumnNames(String[] nuevosNombres) {
-        if (nuevosNombres.length == encabezados.length) {
-            this.encabezados = nuevosNombres;
-            fireTableStructureChanged();
-        } else {
-            throw new IllegalArgumentException("Valide los campos");
+    @Override
+    public Object getValueAt(int fila, int col) {
+        Cliente c = lista.get(fila);
+        switch (col) {
+            case 0: return c.getIdCliente();
+            case 1: return c.getTipoPersona();
+            case 2: return c.getNombreCompleto();
+            case 3: return c.getRfc();
+            case 4: return c.getCurp();
+            case 5: return c.getTelefono();
+            case 6: return c.getCorreo();
+            case 7: return c.getFechaRegistro();
+            case 8: return c.isActivo();
+            default: return null;
         }
     }
 
-    public void vaciarLista() {
-        clienteLista.clear();
-    }
+    public Cliente getCliente(int fila) { return lista.get(fila); }
 
-    @Override
-    public int getRowCount() {
-        return clienteLista.size();
-    }
+    public void llenar(List<Cliente> datos) { lista.addAll(datos); }
 
-    @Override
-    public int getColumnCount() {
-        return encabezados.length;
-    }
-
-    @Override
-    public Object getValueAt(int rowIndex, int columnIndex) {
-        if (rowIndex > -1 && rowIndex < clienteLista.size()) {
-            Cliente c = clienteLista.get(rowIndex);
-            switch (columnIndex) {
-                case 0: return c.getIdCliente();
-                case 1: return c.getNombre();
-                case 2: return c.getTelefono();
-                case 3: return c.getCorreo();
-                case 4: return c.getRfc();
-                case 5: return c.getDireccion();
-                case 6: return c.getMedioContacto();
-                case 7: return c.isActivo();
-                default: return null;
-            }
-        }
-        return null;
-    }
-
-    public void addCliente(Cliente c) {
-        clienteLista.add(c);
-        fireTableRowsInserted(clienteLista.size() - 1, clienteLista.size() - 1);
-    }
-
-    public void updateCliente(int fila, Cliente nueva) {
-        clienteLista.set(fila, nueva);
-        fireTableRowsUpdated(fila, fila);
-    }
-
-    public Cliente getCliente(int fila) {
-        return clienteLista.get(fila);
-    }
-
-    public void removeCliente(int fila) {
-        clienteLista.remove(fila);
-        fireTableRowsDeleted(fila, fila);
-    }
-
-    public void llenar(List<Cliente> lista) {
-        this.clienteLista = (lista != null) ? lista : new ArrayList<>();
-    }
+    public void vaciarLista() { lista.clear(); }
 }
